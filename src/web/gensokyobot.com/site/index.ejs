@@ -1,0 +1,64 @@
+<%- include('./inc/head') %>
+        <section id="heroMain" class="hero is-primary is-fullheight video">
+            <div class="hero-video is-transparent" style="filter: blur(10px); -webkit-filter: blur(10px);">
+                <video poster="" playsinline="" autoplay="" muted="" loop ="" style="object-fit: cover;">
+                    <source src="/_gb/vid.mp4" type="video/mp4">
+                </video>
+            </div>
+            <%- include('./inc/nav') %>
+            <div id="navBot" class="navbar is-fixed-bottom is-black is-spaced is-hidden-mobile" style="background-color: rgb(17, 17, 17);">
+                <div class="navbar-brand is-dark">
+                    <a class="navbar-item" href="/playing">
+                        <img id="songBarImage" style="display: inline;" />
+                        <span style="margin-left: 10px;">
+                            <div>
+                                <span id="songBarArtist"></span>
+                                <span id="songBarTitle"></span>
+                            </div>
+                            <div id="songBarAlbum" style="font-size:10pt;"></div>
+                        </span>
+                    </a>
+                </div>
+                <div class="navbar-end">
+                    <span id="songBarCounter"></span>
+                </div>
+            </div>
+            <style>
+                @media (min-width: 1408px) {
+                    .slogan {
+                        white-space: nowrap;
+                    }
+                }
+            </style>
+            <div class="hero-body">
+                <div class="container">
+                    <div class="columns is-vcentered">
+                        <div class="column">
+                            <figure class="image is-square">
+                                <img src="/_gb/hero.png" />
+                            </figure>
+                        </div>
+                        <div class="column">
+                            <h1 class="title">GensokyoBot</h1>
+                            <h2 class="subtitle">
+                                <p style="font-weight: bold;">げんそきょぼｔ</p>
+                                <br>
+                                <p class="slogan">The #1 Touhou Music Bot for fan-made Touhou Music since 2017</p>
+                            </h2>
+                            <span>
+                                <a href="/cmds">
+                                    <div class="button is-white is-outlined has-text-weight-bold is-size-4">Commands</div>
+                                </a>
+                            </span>&nbsp;
+                            <span>
+                                <a href="/support">
+                                    <div class="button is-white is-outlined has-text-weight-bold is-size-4">Listen On Discord</div>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </body>
+</html>

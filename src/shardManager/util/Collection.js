@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Collection = void 0;
+/** Collection-ish */
+class Collection extends Map {
+    constructor() {
+        super();
+    }
+    find(func) {
+        for (const item of this.values()) {
+            if (func(item)) {
+                return item;
+            }
+        }
+        return undefined;
+    }
+}
+exports.Collection = Collection;
