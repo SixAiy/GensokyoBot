@@ -27,7 +27,7 @@ const cluster_1 = require("cluster");
 const Collection_1 = require("../util/Collection");
 const Queue_1 = require("../util/Queue");
 const Eris = __importStar(require("eris"));
-require('../../additionals')(Eris);
+require('../../util/extendEris')(Eris);
 const Cluster_1 = require("../clusters/Cluster");
 const Service_1 = require("../services/Service");
 const path = __importStar(require("path"));

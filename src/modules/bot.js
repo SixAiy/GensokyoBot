@@ -1,7 +1,7 @@
 "use strict"
 
 let 
-    mod = require('../util/mod.Eris').mdoule("bot"),
+    mod = require('../util/mod').mdoule("bot"),
     moment = require("moment"),
     util = require('util'),
     os = require("os");
@@ -20,14 +20,14 @@ mod.command("help", {
             mods = app.modman.getPlugins();
 
         if(type = "dis") {
-            let em = app.dis.makeEmbed();
+            let em = app.bot.makeEmbed();
 
             em.field("Help & Support", `[Commands List](${web}/commands)\n[Network Status](http://status.sixaiy.com)`, true);
-            em.field(`Get ${app.dis.user.username}`, `[Add ${app.dis.user.username}](${web}/invite)\n[Add ${app.dis.user.username} Extreme]](${web}/extreme)`, true);
+            em.field(`Get ${app.bot.user.username}`, `[Add ${app.bot.user.username}](${web}/invite)\n[Add ${app.bot.user.username} Extreme]](${web}/extreme)`, true);
 
             mods.map((m) => {
                 let 
-                    data = app.dis._plugins[m].mod.getAllCommands(),
+                    data = app.bot._plugins[m].mod.getAllCommands(),
                     name = "",
                     loaded = data.map((md) => {
                         totalCmds++
@@ -47,7 +47,7 @@ mod.command("help", {
             em.field(`Commands`, `**${usableCmds} Usable / **${totalCmds}** Total`, true);
             em.color(conf.dis.c);
             em.author(`Server: ${msg.channel.guild.name}`);
-            em.footer(`Project ${app.dis.user.username}`, app.dis.user.avatarURL);
+            em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
             em.timestamp();
 
             msg.channel.createEmbed(em);
@@ -84,11 +84,11 @@ mod.command("stats", {
     func: async function(type, msg, app, args, rank) {
         let ping = Date.now();
         if(type == "dis") {
-            msg.channel.createMessage("Loading Statistics").then((m) => {
+            msg.channel.createMessage("Loading Statistics").then(async (m) => {
                 m.delete();
                 let 
                     clusters = "",
-                    em = app.dis.makeEmbed(),
+                    em = app.bot.makeEmbed(),
                     stats = await app.ipc.getStats(),
                     loadavg = os.loadavg(),
                     totalram = stats.totalRam,
@@ -99,10 +99,10 @@ mod.command("stats", {
                 
                 stats.clusters.map((d) => clusters++ );
 
-                em.author(`${app.dis.user.username} Stats`, app.dis.user.avatarURL);
+                em.author(`${app.bot.user.username} Stats`, app.bot.user.avatarURL);
                 em.field('Bot', `Ping: **${Date.now() - ping}ms\n**Uptime: **${moment.duration(uptime).format(" D [days], H [hrs], m [mins], s [secs]")}**\nMemory: **${(totalram - clustram).toFixed(3)} MB / ${totalRam.toFixed(3)} MB**`, false);
                 em.field("Stats", `Shards: **${shards.toLocaleString()}**\nGuilds: **${guilds.toLocaleString()}**`, false);
-                em.field("Server", `Load Avg: **${loadavg[0].toFixed(3)}, ${loadavg[1].toFixed(3)}, ${loadavg[2].toFixed(3)}**\nMemory: **${app.dis.serverRam(os.freemem())} / ${app.dis.serverRam(os.totalmem())}**`, false);
+                em.field("Server", `Load Avg: **${loadavg[0].toFixed(3)}, ${loadavg[1].toFixed(3)}, ${loadavg[2].toFixed(3)}**\nMemory: **${app.bot.serverRam(os.freemem())} / ${app.bot.serverRam(os.totalmem())}**`, false);
                 em.timestamp();
                 em.color(conf.dis.c);
                 
@@ -121,9 +121,9 @@ mod.command("bot", {
         if(type == "dis") {
             let cmd = args.split(' ');
             if(!cmd[0]) {
-                let em = app.dis.makeEmbed();
+                let em = app.bot.makeEmbed();
                 em.author("Fleet Commander");
-                em.thumbnail(app.dis.user.avatarURL)
+                em.thumbnail(app.bot.user.avatarURL)
                 em.color(0x421250);
                 em.field(`service`, "Restarts Service (ex: bot service <web/telegram>)", true);
                 em.field(`clusters`, "Cluster Commander", true);
@@ -131,7 +131,7 @@ mod.command("bot", {
                 em.field(`relaod`, "Reloads a module", true);
                 em.field(`eval`, "Evals anything connected to the bot", true);
                 em.timestamp();
-                em.footer(`Project ${app.dis.user.username}`);
+                em.footer(`Project ${app.bot.user.username}`);
 
                 msg.channel.createEmbed(em);
             }
@@ -142,7 +142,7 @@ mod.command("bot", {
             }
             if(cmd[0] == "clusters") {
                 if(!cmd[1]) {
-                    let em = app.dis.makeEmbed();
+                    let em = app.bot.makeEmbed();
                     em.author("Cluster Commander");
                     em.thumbnail(bot.user.avatarURL)
                     em.color(0x421250);
@@ -150,7 +150,7 @@ mod.command("bot", {
                     em.field(`restart`, "Restart Cluster <number>", true);
                     em.field(`restart all`, "Restart all clusters", true);
                     em.timestamp();
-                    em.footer(`Project ${app.dis.user.username}`);
+                    em.footer(`Project ${app.bot.user.username}`);
 
                     msg.channel.createEmbed(em);
                 }
@@ -179,20 +179,20 @@ mod.command("bot", {
                     let 
                         back = eval(arg),
                         string = util.inspect(back, { depth: 1 }),
-                        em = app.dis.makeEmbed();
+                        em = app.bot.makeEmbed();
 
                     em.title("Eval Results");
                     em.color(0x8BC34A);
                     em.field("Input", generateCodeblock(arg));
                     em.field("Output", generateCodeblock(string));
                     em.timestamp();
-                    em.footer(`Project ${app.dis.user.username}`);
+                    em.footer(`Project ${app.bot.user.username}`);
                     
                     msg.channel.createEmbed(em);
 
                 } catch(e) {
 
-                    let em = app.dis.makeEmbed();
+                    let em = app.bot.makeEmbed();
                     em.title("Eval Results");
                     em.color(0xF44336);
                     em.field("Input", generateCodeblock(arg));

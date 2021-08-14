@@ -9,7 +9,7 @@ function Module(name) {
     this._cmdi = [];
 };
 
-Module.prototype.getName = () => { return this._name };
+Module.prototype.getName = function() { return this._name };
 
 function makematch(name) {
     return function(body) {
@@ -28,14 +28,14 @@ function makematch(name) {
     }
 }
 
-Module.prototype.command = (name, opts) => {
+Module.prototype.command = function(name, opts) {
     let obj = { name: name, match: opts.match || makematch(name), rank: opts.rank, func: opts.func, desc: opts.desc };
     this._cmdi[name] = obj;
     this._cmds.push(obj);
     if(opts.desc != undefined) this._desc[opts.desc] = true;
 }
 
-Module.prototype.getCommand = (body) => {
+Module.prototype.getCommand = function(body) {
     for(let i = 0; i < this._cmds.length; i++) {
         let 
             cmd = this._cmds[i],
@@ -51,19 +51,15 @@ Module.prototype.getCommand = (body) => {
     return undefined;
 }
 
-Module.prototype.getIC = (body, m) => {
+Module.prototype.getIC = function(body, m) {
     
 }
 
-Module.prototype.getAllCommands = () => { return this._cmds; };
+Module.prototype.getAllCommands = function() {return this._cmds; };
 
-Module.prototype.alias = (match, cmd) => {
-    if(typeof match == "string") {
-        match = makematch(match, undefined);
-    } else if(match instanceof RegExp) {
-        match = makematch(undefined, match);
-    }
+Module.prototype.alias = function(match, cmd) {
+    match = makematch(match);
     this._aliases.push({ match: match, cmd: cmd });
 }
 
-exports.mdoule = (name) => { return new Module(name); };
+exports.mdoule = function(name) { return new Module(name); };

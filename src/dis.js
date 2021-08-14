@@ -1,32 +1,39 @@
 "use strict"
 
-let { BaseClusterWorker } = require('./util/shardManager');
+let 
+    { BaseClusterWorker } = require('./shardManager'),
+    conf = require('./conf');
 
 class Bot extends BaseClusterWorker {
+
     constructor(setup) {
         super(setup);
         
         this.modman.LoadPlugins();
         this._plugins = this.modman.pluginslist;
 
-        require('./util/func.Eris')(this);
+        require('./util/func.js')(this);
 
-        this.dis.core = this;
-        this.dis.createSlashs();
-        this.dis.editStatus("online", { name: `/help or ,,help`, type: 0 });
-        this.dis.on("interactionCreate", this.interHandle.bind(this));
-        this.dis.on("messageCreate", this.msgHandle.bind(this));
+        this.bot.core = this;
+        //this.bot.createSlashs();
+        this.bot.editStatus("online", { name: `/help or ${conf.dis.p}help`, type: 0 });
+        //this.bot.on("interactionCreate", (m) => this.bot.getIC(m));
+        //this.bot.on('messageCreate', this.handleMsg.bind(this));
+        this.bot.on("messageCreate", this.handleMsg.bind(this)); 
+        this.bot.on('rawWS', (d) => {
+            console.log("HELLO rawWS!?");
+            if(d.t == "MESSAGE_CREATE") {
+                console.log("HELLO MESSAGE CREATE!?");
+            }
+        });
     }
-    async interHandle(inter) { 
-        this.dis.getIC(inter); 
-    }
-    async msgHandle(msg) {
-        if(msg.author.bot) return;
-        msg.prefix = require('./conf').dis.prefix;        
-        this.dis.getMC(msg);
+    async handleMsg(m) {
+        if(m.user.bot) return;
+        m.prefix = conf.dis.p;
+        this.bot.getMC(m);
     }
     async shutdown(done) {
-        await this.dis.disconnect();
+        await this.bot.disconnect();
         done();
     }
 }

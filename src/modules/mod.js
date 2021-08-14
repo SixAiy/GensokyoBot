@@ -1,7 +1,7 @@
 "use strict"
 
 let 
-    mod = require('../util/mod.Eris').mdoule("mod"),
+    mod = require('../util/mod').mdoule("mod"),
     fetch = require('node-fetch');
 
 

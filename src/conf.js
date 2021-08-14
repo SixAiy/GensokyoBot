@@ -8,17 +8,18 @@ module.exports = {
         a: {
 
             // Public Bots
-            //dis:    "MzAyODU3OTM5OTEwMTMxNzEy.WPJYbw.h83qa7Uhb6IjWKSYuASg0et04tU", // Discord
-            //tg:     "1926660094:AAGhdfCvQ6H3AC3Vhui8_T41HNC9bPbZfwM", // Telegram
+            //dis: "MzAyODU3OTM5OTEwMTMxNzEy.WPJYbw.h83qa7Uhb6IjWKSYuASg0et04tU", // Discord
+            //tg: "1926660094:AAGhdfCvQ6H3AC3Vhui8_T41HNC9bPbZfwM", // Telegram
 
             // Development Bots
-            dis:  "ODc1NTQ4ODg5MTM3MTc2NTk3.YRXIcg.0JQp1mY6B_GFdzFy-oNIdqualeI", // Discord
-            tg:   "1716405779:AAEKxoCf4iWlwGDrtoGQ2kAoyDWWkJKwiB0", // Telegram
+            dis: "ODc1NTQ4ODg5MTM3MTc2NTk3.YRXIcg.0JQp1mY6B_GFdzFy-oNIdqualeI", // Discord - GensokyoBot EX
+            //dis: "NjE3MzI3NzEwOTc2NjA2MjA4.XWphOw.A15Y1XsKkANMUquxBr_7dbS4cSs", // Discord - RetroSix
+            //tg:  "1716405779:AAEKxoCf4iWlwGDrtoGQ2kAoyDWWkJKwiB0", // Telegram
         },
         // Internal Keys for api.sixaiy.com
         k: {
-            gb:    "1c8439d9e3491f3f:ddb1836c05b269b9385f4260802c067d", // GensokyoBot
-            sc:     "" // Sentcord
+            gb: "1c8439d9e3491f3f:ddb1836c05b269b9385f4260802c067d", // GensokyoBot
+            sc: "" // Sentcord
         },
         // URLs
         u: {
@@ -50,7 +51,7 @@ module.exports = {
     // Discord
     dis: {
         slash: false, // Enable Slash Commands?
-        p: ",,", // Prefix
+        p: ">>", // Prefix
         o: [
             "188571987835092992", // SixAiy#0015
             "81011298891993088"   // Freya#2602

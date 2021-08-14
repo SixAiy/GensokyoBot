@@ -1,20 +1,20 @@
 "use strict"
 
-let 
-    // Configuration Information
-    conf = require('./src/conf'),
-    
+let     
     // Fleet Requirements
     { isMaster } = require('cluster'),
-    { Fleet } = require('./src/util/shardManager'),
+    { Fleet } = require('./src/shardManager'),
 
     // General Requirements
     path = require("path"),
     { clear } = require("console"),
     
+    // Configuration Information
+    conf = require('./src/conf'),
+    
     // Final Stage
     fleetSettings = { 
-        name: "Gensokyobot", path: path.join(__dirname, "./src/dis.js"), token: conf.api.dis//, 
+        name: "GensokyoBot", path: path.join(__dirname, "./src/dis.js"), token: conf.api.a.dis //, 
         //services: [
             //{ name: "GWeb", path: path.join(__dirname, "./src/gw.js") },
             //{ name: "SWeb", path: path.join(__dirname, "./src/sc.js") },
