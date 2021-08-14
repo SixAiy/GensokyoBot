@@ -6,7 +6,6 @@ module.exports = {
     api: {
         // Applications
         a: {
-
             // Public Bots
             //dis: "MzAyODU3OTM5OTEwMTMxNzEy.WPJYbw.h83qa7Uhb6IjWKSYuASg0et04tU", // Discord
             //tg: "1926660094:AAGhdfCvQ6H3AC3Vhui8_T41HNC9bPbZfwM", // Telegram
