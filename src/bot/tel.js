@@ -5,8 +5,8 @@ let
     Telegram = require('node-telegram-bot-api'),
 
     // Local
-    { BaseServiceWorker } = require('./shardManager'),
-    conf = require('./conf');
+    { BaseServiceWorker } = require('../shardManager'),
+    conf = require('../conf');
 
 module.exports = class ServiceWorker extends BaseServiceWorker {
     constructor(setup) {

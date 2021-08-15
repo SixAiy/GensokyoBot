@@ -9,9 +9,9 @@ let
     morgan = require('morgan'),
 
     // Local
-    { BaseServiceWorker } = require('./shardManager'),
-    conf = require('./conf'),
-    dir = path.resolve('./src/web/gensokyobot.com'),
+    { BaseServiceWorker } = require('../shardManager'),
+    conf = require('../conf'),
+    dir = path.resolve('./src/web'),
     site = path.resolve(`${dir}/site`);
 
 module.exports = class ServiceWorker extends BaseServiceWorker {

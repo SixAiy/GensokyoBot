@@ -14,11 +14,15 @@ let
     
     // Final Stage
     fleetSettings = { 
-        name: "GensokyoBot", path: path.join(__dirname, "./src/dis.js"), token: conf.api.a.dis //, 
+        name: "GensokyoBot", path: path.join(__dirname, "./src/bot/dis.js"), token: conf.api.a.dis //, 
         //services: [
-            //{ name: "GWeb", path: path.join(__dirname, "./src/gw.js") },
-            //{ name: "SWeb", path: path.join(__dirname, "./src/sc.js") },
-            //{ name: "Telegram", path: path.join(__dirname, "./src/tel.js") },
+            // Other Bot Services
+            //{ name: "telegram", path: path.join(__dirname, "./src/bot/tel.js") },
+            //{ name: "twitch", path: path.join(__dirname, "./src/bot/ttv.js") },
+            //{ name: "irc", path: path.join(__dirname, "./src/bot/irc.js") },
+
+            // Websites
+            //{ name: "gensokyobot.com", path: path.join(__dirname, "./src/web/index.js") },
         //]
     },
     Master = new Fleet(fleetSettings);
