@@ -4,6 +4,28 @@ let conf = require('../conf');
 
 module.exports = async(m) => {
     // Interaction Create Commands
+    m.bot.createSlashComamnd = async() => {
+        let 
+            plug = m.modman.pluginlist,
+            mods = m.modman.getPlugins(),
+            output = [];
+
+        mods.map(async(x) => {
+            let 
+                d = plug[x].mod.getAllCommands(),
+                c = d.map(async(l) => {
+                    if(l.name != "" || l.name != null || n != "" || n != null) {
+                        return { name: l.name, desc: l.desc }
+                    }
+                });
+                f = c.filter((e) => { return e != null });
+            output.push(f);
+        });
+        for(let o of output) {
+            m.bot.slashCmd.registerCommand(`${conf.discord.slashPrefix}${o.name}`);
+            await new Promise((res) => setTimeout(res, 5000));
+        }
+    };   
     /*
     m.bot.createSlashs = async() => {
         let 
@@ -16,7 +38,8 @@ module.exports = async(m) => {
                     mdata = plugins[m].modman.getAllCommands(),
                     cmds = mdata.map(async(md) => { 
                         if(0 >= md.rank) {   
-                            if(md.name != "" || md.name != null || name != "" || name != null) return { name: `,,${md.name}`, desc: md.desc }
+                            if(md.name != "" || md.name != null || name != "" || name != null) 
+                            return { name: `,,${md.name}`, desc: md.desc }
                         }
                     });
                 output = cmds.filter((e) => { return e != null });
@@ -34,57 +57,58 @@ module.exports = async(m) => {
     */
 
     // interactionCreate Handlers
-    m.bot.getIC = async(inter) => {
+    m.bot.getICommand = async(msg, app) => {
         let 
             lvl = m.bot.plvl("i", inter),
             r = undefined;
-        for(let p in m.bot.core._plugins) {
-            r = m.bot.core._plugins[p].module.getCmdI(inter, m);
+        for(let p in app.bot.core._plugins) {
+            r = app.bot.core._plugins[p].module.getCmdI(inter, m);
             if(r != undefined) {
-                if(lvl >= r.cmd.rank) r.cmd.func(inter, m, r.res.args || "");
-            }
-        }
-    };
-    // messageCreate Handlers
-    m.bot.getMC = async(msg) => {
-        console.log("Inside getMC");
-        if(msg.author.bot) return;
-        msg.prefix = conf.dis.p;     
-        let 
-            lvl = m.bot.pLvl(msg),
-            r = undefined;
-        for(let p in m.bot.core._plugins) {
-            r = m.bot.core._plugins[p].module.getCommand(msg, m);
-            if(r != undefined) {
-                console.log("arrived after 'r != undefined'");
-                if(lvl >= r.cmd.rank) r.cmd.func(msg, m, r.res.args || ""); console.log("on Command!");
+                if(lvl >= r.cmd.rank) r.cmd.func("tg", msg, app, r.res.args || "");
             }
         }
     };
 
-    // Main Functions
-    m.bot.pLvl = async(t, x) => {
+    // messageCreate Handlers
+    m.bot.getCommand = (msg, app) => {
+        msg.prefix = conf.discord.prefix;
+
+        const prefixMention = new RegExp(`^<@!?${app.bot.user.id}>( |)$`);
+        if(msg.content.match(prefixMention)) return msg.channel.createMessage(`Your prefix is \`${msg.prefix}\``);
+        if(msg.content.indexOf(msg.prefix) !== 0) return;
+
         let 
-            plvl = 0,
-            porder = m.bot.perm.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
-        if(t == "i") {
-            while(porder.length) {
-                let clvl = porder.shift();
-                if(clvl.check(x, m)) {
-                    plvl = clvl.level;
-                    break;
+            level = app.bot.permlevel(app, msg),
+            friendly = app.bot.perms.find(l => l.level == level).name,
+            systemLevel = { friendly: friendly, level: level },
+            res = undefined;
+        
+        for(let plugin in app.bot.core._plugins) {
+            let r = app.bot.core._plugins[plugin].mod.getCommand(msg);
+            if(r !== undefined) {
+                res = r;
+                if(level >= res.cmd.rank) {
+                    let args = res.res.args || "";
+                    res.cmd.func("dis", app, msg, args, systemLevel);
                 }
             }
-        } else {
-            while(porder.length) {
-                let clvl = porder.shift();
-                if(clvl.check(x, m)) {
-                    plvl = clvl.level;
-                    break;
-                }
+        }
+    }
+
+    // Main Functions
+    m.bot.permlevel = (app, msg) => {
+        let permlvl = 0;
+        const permOrder = app.bot.perms.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
+        while (permOrder.length) {
+            const currentLevel = permOrder.shift();
+            if (msg.guild && currentLevel.guildOnly) continue;
+            if (currentLevel.check(app, msg)) {
+                permlvl = currentLevel.level;
+                break;
             }
-        }   
-    };
+        }
+        return permlvl;
+    }
     m.bot.clean = async(bot, txt) => {
         if(txt && txt.constructor.name == "Promise") txt = await txt;
         if(typeof evaled != "String") txt = await txt;
@@ -110,12 +134,24 @@ module.exports = async(m) => {
         }
         return { vclisteners, vcusers };
     };
-    m.bot.serverRam = async(ram) => {
-        let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        if(ram == 0) return "0 GB";
-        let i = parseInt(Math.floor(Math.log(ram) / Math.log(1024)));
-        return Math.round(ram / Math.pow(1024, i), 2) + ' ' + sizes[i];
-    }; 
+    m.bot.dhm = (time) => {
+        let 
+            date = new Date(time * 1000),
+            months = date.getUTCMonth(),
+            days = date.getUTCDate - 1,
+            hours = date.getUTCHours(),
+            minutes = date.getUTCMinutes(),
+            seconds = date.getUTCSeconds(),
+            segments = [];
+            
+        if(months > 0) segments.push(months + " mo" + ((months == 1) ? "" : "s"));
+        if(days > 0) segments.push(days + ' d' + ((days == 1) ? '' : 's'));
+        if(hours > 0) segments.push(hours + ' hr' + ((hours == 1) ? '' : 's'));
+        if(minutes > 0) segments.push(minutes + ' min' + ((minutes == 1) ? '' : 's'));
+        if(seconds > 0) segments.push(seconds + ' sec' + ((seconds == 1) ? '' : 's'));
+
+        return segments.join(', ');
+    }
 
     /*
     // Grabs Staff members
@@ -130,40 +166,48 @@ module.exports = async(m) => {
     */
 
     // Permission System Storage
-    m.bot.perm = [
+    m.bot.perms = [
         { 
-            level: 0, name: "User", 
+            level: 0, 
+            name: "User", 
             check: () => true 
         },
         /*
         { 
-            level: 1, name: "Guild Mod", 
+            level: 1, 
+            name: "Guild Mod", 
             check: (x, m) => false
         },
         { 
-            level: 2, name: "Guild Admin", 
+            level: 2, 
+            name: "Guild Admin", 
             check: (x, m) => false
         },
         { 
-            level: 3, name: "Guild Owner", 
+            level: 3, 
+            name: "Guild Owner", 
             check: (x, m) => false //m.bot.fetchGuildOwner(x.guild_id) 
         },
         { 
-            level: 4, name: "Bot Mod", 
+            level: 4, 
+            name: "Bot Mod", 
             check: (x, m) => m.bot.fetchStaff(x.user.id, conf.role.mod)
         },
         { 
-            level: 5, name: "Bot Admin", 
+            level: 5, 
+            name: "Bot Admin", 
             check: (x, m) => m.bot.fetchStaff(x.user.id, conf.role.admin) 
         },
         { 
-            level: 6, name: "Bot Dev", 
+            level: 6, 
+            name: "Bot Dev", 
             check: (x, m) => m.bot.fetchStaff(x.user.id, conf.role.dev) 
         },
         */
         { 
-            level: 7, name: "Bot Owner", 
-            check: (x, m) => conf.owners.includes(x.user.id)
+            level: 7, 
+            name: "Bot Owner", 
+            check: (app, msg) => conf.discord.owners.includes(msg.author.id)
         }
     ];
 

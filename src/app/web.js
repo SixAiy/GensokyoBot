@@ -36,8 +36,8 @@ module.exports = class ServiceWorker extends BaseServiceWorker {
         this.redirectPage('/playing', conf.w.p.gr);
         this.redirectPage("/status", conf.w.p.n);
         this.redirectPage("/support", conf.w.p.s);
-        this.redirectPage("/invite", conf.w.p.i);
-        this.redirectPage("/extreme", conf.w.p.ei);
+        this.redirectPage("/inv/gb", conf.w.p.i);
+        this.redirectPage("/inv/ex", conf.w.p.ei);
 
         this.w.listen(conf.w.port, () => this.serviceReady());
 

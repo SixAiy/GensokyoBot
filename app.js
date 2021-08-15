@@ -1,31 +1,20 @@
 "use strict"
 
 let     
-    // Fleet Requirements
     { isMaster } = require('cluster'),
     { Fleet } = require('./src/shardManager'),
-
-    // General Requirements
     path = require("path"),
     { clear } = require("console"),
-    
-    // Configuration Information
-    conf = require('./src/conf'),
-    
-    // Final Stage
-    fleetSettings = { 
-        name: "GensokyoBot", path: path.join(__dirname, "./src/bot/dis.js"), token: conf.api.a.dis //, 
-        //services: [
-            // Other Bot Services
-            //{ name: "telegram", path: path.join(__dirname, "./src/bot/tel.js") },
-            //{ name: "twitch", path: path.join(__dirname, "./src/bot/ttv.js") },
-            //{ name: "irc", path: path.join(__dirname, "./src/bot/irc.js") },
+    conf = require('./src/conf');
 
-            // Websites
-            //{ name: "gensokyobot.com", path: path.join(__dirname, "./src/web/index.js") },
-        //]
-    },
-    Master = new Fleet(fleetSettings);
+const fleetSettings = { 
+    name: "GensokyoBot", path: path.join(__dirname, "./src/app/discord.js"), token: conf.discord.token, 
+    //services: [
+        //{ name: "telegram", path: path.join(__dirname, "./src/app/telegram.js") },
+        //{ name: "gensokyobot.com", path: path.join(__dirname, "./src/app/web.js") },
+    //]
+};
+const Master = new Fleet(fleetSettings);
 
 if(isMaster) {
     clear();

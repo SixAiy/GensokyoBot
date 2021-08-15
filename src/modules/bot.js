@@ -1,7 +1,8 @@
 "use strict"
 
 let 
-    mod = require('../util/mod').mdoule("bot"),
+    mod = require('../util/mod').module("bot"),
+    conf = require('../conf'),
     moment = require("moment"),
     util = require('util'),
     os = require("os");
@@ -9,9 +10,9 @@ let
 mod.alias("commands", "help");
 mod.alias("invite", "help");
 mod.command("help", {
-    desc: "",
+    feature: "Shows a list of all commands and information",
     rank: 0,
-    func: async function(type, msg, app, args, rank) {
+    func: async function(type, app, msg, args, rank) {
         let 
             web = "https://gensokyobot.com",
             output = "",
@@ -23,11 +24,11 @@ mod.command("help", {
             let em = app.bot.makeEmbed();
 
             em.field("Help & Support", `[Commands List](${web}/commands)\n[Network Status](http://status.sixaiy.com)`, true);
-            em.field(`Get ${app.bot.user.username}`, `[Add ${app.bot.user.username}](${web}/invite)\n[Add ${app.bot.user.username} Extreme]](${web}/extreme)`, true);
+            em.field(`Get ${app.bot.user.username}`, `[Add GensokyoBot](${web}/inv/gb)\n[Add GensokyoBot EX](${web}/inv/ex)`, true);
 
             mods.map((m) => {
                 let 
-                    data = app.bot._plugins[m].mod.getAllCommands(),
+                    data = app.bot.core._plugins[m].mod.getAllCommands(),
                     name = "",
                     loaded = data.map((md) => {
                         totalCmds++
@@ -44,8 +45,8 @@ mod.command("help", {
             em.description(`Hay **${msg.author.username}**\nYou can show your prefix anytime by mentioning me.`);
             em.field(`Bot Rank`, `${rank.level} (${rank.friendly})`, true);
             em.field(`You're Prefix`, `\`${msg.prefix}\``, true);
-            em.field(`Commands`, `**${usableCmds} Usable / **${totalCmds}** Total`, true);
-            em.color(conf.dis.c);
+            em.field(`Commands`, `**${usableCmds}** Usable / **${totalCmds}** Total`, true);
+            em.color(conf.discord.color);
             em.author(`Server: ${msg.channel.guild.name}`);
             em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
             em.timestamp();
@@ -79,9 +80,9 @@ mod.alias("ping", "stats");
 mod.alias("shards", "stats");
 mod.alias("status", "stats");
 mod.command("stats", {
-    desc: "",
+    feature: "Shows Ping, Status and much more information regarding the bot.",
     rank: 0,
-    func: async function(type, msg, app, args, rank) {
+    func: async function(type, app, msg, args, rank) {
         let ping = Date.now();
         if(type == "dis") {
             msg.channel.createMessage("Loading Statistics").then(async (m) => {
@@ -98,13 +99,12 @@ mod.command("stats", {
                     uptime = process.uptime();
                 
                 stats.clusters.map((d) => clusters++ );
-
+                
                 em.author(`${app.bot.user.username} Stats`, app.bot.user.avatarURL);
-                em.field('Bot', `Ping: **${Date.now() - ping}ms\n**Uptime: **${moment.duration(uptime).format(" D [days], H [hrs], m [mins], s [secs]")}**\nMemory: **${(totalram - clustram).toFixed(3)} MB / ${totalRam.toFixed(3)} MB**`, false);
+                em.field('Bot', `Ping: **${Date.now() - ping}ms\n**Uptime: **${app.bot.dhm(uptime)}**\nMemory: **${(totalram - clustram).toFixed(3)} MB / ${totalram.toFixed(3)} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
                 em.field("Stats", `Shards: **${shards.toLocaleString()}**\nGuilds: **${guilds.toLocaleString()}**`, false);
-                em.field("Server", `Load Avg: **${loadavg[0].toFixed(3)}, ${loadavg[1].toFixed(3)}, ${loadavg[2].toFixed(3)}**\nMemory: **${app.bot.serverRam(os.freemem())} / ${app.bot.serverRam(os.totalmem())}**`, false);
                 em.timestamp();
-                em.color(conf.dis.c);
+                em.color(conf.discord.color);
                 
                 msg.channel.createEmbed(em);
             });
@@ -115,9 +115,9 @@ mod.command("stats", {
 
 mod.alias("m", "bot");
 mod.command("bot", {
-    desc: "",
+    feature: "Owner stuff will only work for the owner!",
     rank: 7,
-    func: async function(type, msg, app, args, rank) {
+    func: async function(type, app, msg, args, rank) {
         if(type == "dis") {
             let cmd = args.split(' ');
             if(!cmd[0]) {
@@ -127,6 +127,7 @@ mod.command("bot", {
                 em.color(0x421250);
                 em.field(`service`, "Restarts Service (ex: bot service <web/telegram>)", true);
                 em.field(`clusters`, "Cluster Commander", true);
+                em.field(`shards`, `Shard Commander`, true);
                 em.field(`reshard`, "Reshards all the Discord Shards", true);
                 em.field(`relaod`, "Reloads a module", true);
                 em.field(`eval`, "Evals anything connected to the bot", true);
@@ -144,7 +145,7 @@ mod.command("bot", {
                 if(!cmd[1]) {
                     let em = app.bot.makeEmbed();
                     em.author("Cluster Commander");
-                    em.thumbnail(bot.user.avatarURL)
+                    em.thumbnail(app.bot.user.avatarURL)
                     em.color(0x421250);
                     em.field(`find`, "Find a guild on a cluster", true);
                     em.field(`restart`, "Restart Cluster <number>", true);
@@ -169,7 +170,20 @@ mod.command("bot", {
                 msg.channel.createMessage("Restarting All Shards");
                 app.ipc.reshard();
             }
-            if(cmd[0] == "reload") return msg.channel.createMessage("The reload function has been disabled. This will be placed into IPC for Global Reload.");
+            if(cmd[0] == "reload") {
+                if(!cmd[1]) return msg.channel.createMessage("The reload function has been disabled. This will be placed into IPC for Global Reload.");
+                let state = app.modman.reload(cmd[1]);
+                //let json = JSON.stringify({ plugin: cmd[1], chID: msg.channel.id })
+                //main.ipc.admrialBroadcast("reloadPlugin", json);
+                if(state) {
+                    msg.channel.createMessage(`${cmd[1]} Rloaded ^^`);
+                } else {
+                    let em = bot.makeEmbed();
+                    em.description("0.0 WHAT ARE YOU PLAYING AT REEEEE D:<");
+                    em.image('https://media1.tenor.com/images/a715f8f49a7ca5cfa04bb4eb2899552e/tenor.gif');;
+                    msg.channel.createEmbed(em);
+                }
+            }
             if(cmd[0] == "eval") {
 
                 let arg = cmd.slice(1).join(" ");
@@ -204,6 +218,11 @@ mod.command("bot", {
         }
         if(type == "tg") return app.tg.sendMesage(msg.chat.id, "This feature is only allowed on Discord.");
     }
-})
+});
+
+function generateCodeblock(text) {
+    return `\`\`\`js\n${text}\n\`\`\``;
+};
+
 
 exports.mod = mod;

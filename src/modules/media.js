@@ -1,29 +1,37 @@
 "use strict"
 
 let 
-    mod = require('../util/mod').mdoule("media"),
+    mod = require('../util/mod').module("media"),
+    conf = require('../conf'),
     fetch = require('node-fetch');
 
 mod.alias("play", "p");
 mod.alias("j", "p");
 mod.alias("join", "p");
 mod.command("p", {
-    desc: "",
+    feature: "Plays the music in the voice channel your in",
     rank: 0,
-    func: async function(type, msg, app, args, rank) {
+    func: async function(type, app, msg, args, rank) {
         if(type == "tg") return app.tg.sendMessage(msg.chat.id, "This feature is coming soon!");
-        
-        let perm = msg.channel.guild.members.get(app.bot.user.id);
-        if(!msg.members.voiceState.channelID) return msg.channel.createMessage("You need to be in a voice channel");
-        if(!perm.hasPermission("voiceSpeak")) return msg.channel.createMessage("I need Speak perms");
-        if(!perm.hasPermission("voiceConnect")) return msg.channel.createMessage("I need Connect Perms");
+    
+        let 
+            perm = msg.channel.guild.members.get(app.bot.user.id),
+            vc = msg.member.voiceState.channelID,
+            gr = await fetch(conf.lists.gr.url).then(r => r.json());
 
-        let vc = msg.members.voiceState.channelID;
+        if(!perm.permissions.has("voiceSpeak")) return msg.channel.createMessage("Missing Speak Permissions");
+        if(!perm.permissions.has("voiceConnect")) return msg.channel.createMessage("Missing Connect Permissions");
+        if(!vc) return msg.channel.createMessage("You need to be in a voice channel");
 
-        app.bot.joinVoiceChannel(vc).then((player) => {
-            if(player.playing) return msg.channel.createMessage(`I'm already playing in ${msg.channel.guild.channels.get(vc).name}`);
-            player.player("https://stream.gensokyoradio.net/3", { inlineVolume: true });
-            player.setVolume(50 / 100);
+        let vcn = msg.channel.guild.channels.get(vc).name;
+
+        app.bot.joinVoiceChannel(vc).then(p => {
+            if(p.playing) return msg.channel.createMessage(`Playing Music in ${vcn}`);
+
+			p.play("https://stream.gensokyoradio.net/2", { inlineVolume: true });
+			p.setVolume(50 / 100);
+
+            msg.channel.createMessage(`Now playing **${gr.SONGINFO.ARTIST} - ${gr.SONGINFO.TITLE}** in **${vcn}**`);
         }).catch((e) => console.log(e.stack));
     }
 });
@@ -37,12 +45,12 @@ mod.alias("who", "np");
 mod.alias("radio", "np");
 mod.alias("info", "np");
 mod.command("np", {
-    desc: "",
+    feature: "Displays the current song",
     rank: 0,
-    func: async function(type, msg, app, args, rank) {
+    func: async function(type, app, msg, args, rank) {
         let 
-            gr = await fetch(conf.api.u.gr).then(r => r.json()),
-            api = {
+            gr = await fetch(conf.lists.gr.url).then(r => r.json()),
+            current = {
                 arturl: "https://gensokyoradio.net/images/albums/500/",
                 songid: gr.SONGDATA.SONGID,
                 title: gr.SONGINFO.TITLE,
@@ -60,7 +68,6 @@ mod.command("np", {
                 albumart: gr.MISC.ALBUMART,
                 albumurl: `https://gensokyoradio.net/music/album/${gr.SONGDATA.ALBUMID}`
             },
-			current = api.music,
 			duration = current.duration,
 			xdur = current.played,
 			durM = (Math.floor(duration / 60)),
@@ -73,11 +80,12 @@ mod.command("np", {
 
         if(type == "dis") {
             let em = app.bot.makeEmbed();
-            em.color(conf.dis.c);
-            em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/_gb/gr.png", conf.w.p.gr);
+            em.color(conf.discord.color);
+            em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/static/images/partners/gr.png", conf.web.links.radio)
+            //em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/_gb/gr.png", conf.web.links.radio);
             em.title(`${current.artist} - ${current.title} (${current.circle})`);
-            em.url(current.albumurl);
-            if(current.albumart) em.thumbnail(current.arturl + current.albumart);
+            //em.url(current.albumurl);
+            //if(current.albumart) em.thumbnail(current.arturl + current.albumart);
             em.field("Title", current.title, true);
             em.field("Artist", current.artist, true);
             em.field("Album", current.album, true)
@@ -85,7 +93,7 @@ mod.command("np", {
             em.field('Duration', xdurM + ":" + xdurS + " / " + durM + ':' + durS, true);
             em.field('Rating', current.rating + '/5.00', true);
             em.timestamp();
-            em.footer(`Project ${app.bot.user.username}`);
+            em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
 
             msg.channel.createEmbed(em);
 
@@ -101,17 +109,25 @@ mod.alias("s", "stop");
 mod.alias("disconnect", "stop");
 mod.alias("shutup", "stop");
 mod.command("stop", {
-    desc: "",
+    feature: "Stops the music",
     rank: 0,
-    func: async function(type, msg, app, args, rank) {
+    func: async function(type, app, msg, args, rank) {
         if(type == "tg") return app.tg.sendMessage(msg.chat.id, "This feature is coming soon!");
 
-        let vc = msg.member.voiceState.channelID;
+        let 
+            guild = msg.channel.guild,
+            channel = guild.channels.get(guild.members.get(app.bot.user.id).voiceState.channelID),
+            vc = msg.member.voiceState.channelID;
+        
         if(vc == null || vc == "") return msg.channel.createMessage("You need to be in the voice channel to use this.");
-        if(!msg.channel.guild.members.has(app.bot.user.id)) return msg.channel.createMessage("Something went wrong please use the Report button on our website!");        
-        if(!vc) return msg.channel.createMessage(`You need to be in ${bot.channels.get(msg.channel.guild.members.get(app.bot.user.id).voiceState.channelID).name} to stop the music!`);
+        if(!guild.members.has(app.bot.user.id)) return msg.channel.createMessage("Something went wrong please use the Report button on our website!");        
+        if(!vc) return msg.channel.createMessage(`You need to be in ${channel.name} to stop the music!`);
 
-        app.bot.leaveVoiceChannel(msg.member.voiceState.channelID);
+        let vcn = msg.channel.guild.channels.get(vc).name;
+
+        msg.channel.createMessage(`Leaving ${vcn}`);
+
+        app.bot.leaveVoiceChannel(vc);
     }
 });
 

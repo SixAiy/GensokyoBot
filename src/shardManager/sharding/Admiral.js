@@ -131,7 +131,8 @@ class Admiral extends events_1.EventEmitter {
                 this.whatToLog = options.whatToLog.whitelist;
             }
         }
-        if (options.services) this.servicesToCreate = options.services;
+        if (options.services)
+            this.servicesToCreate = options.services;
         this.services = new Collection_1.Collection();
         this.clusters = new Collection_1.Collection();
         this.launchingWorkers = new Collection_1.Collection();
@@ -205,7 +206,8 @@ class Admiral extends events_1.EventEmitter {
                             let source;
                             if (message.source) {
                                 source = message.source;
-                            } else {
+                            }
+                            else {
                                 let cluster = this.clusters.find((c) => c.workerID == worker.id);
                                 let service = this.services.find((s) => s.workerID == worker.id);
                                 if (!service && !cluster) {
