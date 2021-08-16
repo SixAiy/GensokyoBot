@@ -92,6 +92,10 @@ Module.prototype.getCommand = function (body) {
 Module.prototype.getAllCommands = function () {
     return this._commands;
 };
+Module.prototype.getAllAliases = function() {
+    console.log(this._aliases);
+    return this._aliases;
+}
 Module.prototype.alias = function (match, cmd) {
     if (typeof match === "string") {
         match = makematch(match, undefined);

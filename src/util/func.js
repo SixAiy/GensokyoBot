@@ -153,6 +153,29 @@ module.exports = async(m) => {
         return segments.join(', ');
     }
 
+    // Post Stats to listing site
+    m.bot.postStatsList = async(type, key, app, url) => {
+
+        let d = await app.ipc.getStats();
+        let buildD = {};
+        if(type == "cb") {
+            fetch(`${url}?key=${key}&servercount=${d.guilds}&shardcount=${d.shardCount}`, { 
+                method: "POST"
+            }).then(r => r.json()).then(d => console.log(`Posted stats to ${url}`));
+        }
+        if(type == "topgg") buildD = { server_count: d.guilds, shard_count: d.shardCount };
+        if(type == "dbgg") buildD = { guildCount: d.guilds, shardCount: d.shardCount };
+        if(type == "dbl") buildD = { guilds: d.guilds };
+        if(type == "dls") buildD = { serverCount: d.guilds };
+
+        fetch(url, { 
+            method: "POST",
+            headers: { authorization: key, "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }).then(r => r.json()).then(d => console.log(`Posted stats to ${url}`));
+        
+    };
+
     /*
     // Grabs Staff members
     m.bot.fetchStaff = async(userid, roleid) => {

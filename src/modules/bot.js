@@ -23,8 +23,8 @@ mod.command("help", {
         if(type = "dis") {
             let em = app.bot.makeEmbed();
 
-            em.field("Help & Support", `[Commands List](${web}/commands)\n[Network Status](http://status.sixaiy.com)`, true);
-            em.field(`Get ${app.bot.user.username}`, `[Add GensokyoBot](${web}/inv/gb)\n[Add GensokyoBot EX](${web}/inv/ex)`, true);
+            em.field("Help & Support", `[Commands](${web}/commands)\n[Support](https://gensokyobot.com/support)\n[Status](http://status.sixaiy.com)`, true);
+            em.field(`Get GensokyoBot`, `[Add GensokyoBot](${web}/invite)\n[Add GensokyoBot EX](${web}/inv/ex)`, true);
 
             mods.map((m) => {
                 let 

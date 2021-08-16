@@ -9,10 +9,10 @@ let
 
 const fleetSettings = { 
     name: "GensokyoBot", path: path.join(__dirname, "./src/app/discord.js"), token: conf.discord.token, 
-    //services: [
+    services: [
         //{ name: "telegram", path: path.join(__dirname, "./src/app/telegram.js") },
-        //{ name: "gensokyobot.com", path: path.join(__dirname, "./src/app/web.js") },
-    //]
+        { name: "Web", path: path.join(__dirname, "./src/app/web.js") },
+    ]
 };
 const Master = new Fleet(fleetSettings);
 

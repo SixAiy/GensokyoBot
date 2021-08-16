@@ -5,10 +5,10 @@ let
     conf = require('../conf'),
     fetch = require('node-fetch');
 
-mod.alias("play", "p");
-mod.alias("j", "p");
-mod.alias("join", "p");
-mod.command("p", {
+mod.alias("p", "play");
+mod.alias("j", "play");
+mod.alias("join", "play");
+mod.command("play", {
     feature: "Plays the music in the voice channel your in",
     rank: 0,
     func: async function(type, app, msg, args, rank) {
@@ -36,15 +36,15 @@ mod.command("p", {
     }
 });
 
-mod.alias("now", "np");
-mod.alias("music", "np");
-mod.alias("playing", "np");
-mod.alias("current", "np");
-mod.alias("song", "np");
-mod.alias("who", "np");
-mod.alias("radio", "np");
-mod.alias("info", "np");
-mod.command("np", {
+mod.alias("np", "now");
+mod.alias("music", "now");
+mod.alias("playing", "now");
+mod.alias("current", "now");
+mod.alias("song", "now");
+mod.alias("who", "now");
+mod.alias("radio", "now");
+mod.alias("info", "now");
+mod.command("now", {
     feature: "Displays the current song",
     rank: 0,
     func: async function(type, app, msg, args, rank) {
