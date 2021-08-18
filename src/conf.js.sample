@@ -1,102 +1,42 @@
 "use strict"
 
 module.exports = {
+    discord: {
+        token: "",
 
-    // API Keys
-    api: {
-        // Applications
-        a: {
-            // Public Bots
-            dis:    "", // Discord
-            tg:     "", // Telegram
-
-            // Development Bots - when working on this bot we use a diffrent bot.
-            //dis:  "", // Discord
-            //tg:   "", // Telegram
-        },
-        // Internal Keys for api.sixaiy.com
-        k: {
-            gb:    "", // GensokyoBot
-            sc:     "" // Sentcord
-        },
-        // URLs
-        u: {
-            gb: "",
-            sc: "",
-            top: "",
-            dbgg: "",
-            dbl: "",
-            bls: ""
-        },
-        // External Keys/Tokens
-        l: {
-            carbon: "", // carbonitex
-            top:    "", // top_gg
-            dbgg:   "", // discord.bots.gg
-            dbl:    "", // discordbotlist.com
-            bls:    "", // discordlist.space
-            gr:     "", // Gensokyo Radio
-        }
+        // Config
+        slash: false, // Enable Slash Commands Globally?
+        prefix: "?", // Default Prefix
+        owners: ["", ""],
+        guild: "", // Home Guild
+        color: 0x421250 // Color
     },
-
-    // Telegram
-    tg: { 
-        prefix: "/",
-        owners: ["", "", ""] 
+    telegram: {
+        token: "",
+        prefix: "/", // Default Prefix
     },
-
-    // Discord
-    dis: {
-        slash: false, // Enable Slash Commands?
-        p: ",,", // Prefix
-        o: [
-            "", // SixAiy#0015
-            ""   // Freya#2602
-        ],
-        s: [
-            "", // phoenixwolf#1337
-            "", // Sorch#0001
-            "", // mrdennisbold#3524
-            "", // Silverwolf#0666
-            "", // Otter#0003
-            ""  // Shredder121#7707
-        ],
-        g: {
-            gb: "", // Gensokyo Community
-            fb: ""  // FredBoat Hangout
-        },
-        c: 0x421250 // Color
-    },
-
-    // Bot Listing - Sentcord
-    bl: {
-        du: "https://discord.com/api/webhooks",
-        g: "", // Hardcoded Sentcord Guild
-        o: "", // Hardcoded Owner - Only one person
-
-        // Roles
-        r: {
-            s: "", // Staff
-            d: "", // Bot Developer
-            l: ""  // Listed Bot
-        },
-
-        // logs
-        b: { 
-            i: "",
-            t: ""
-        }
+    // URLs
+    lists: {
+        sa: { url: "https://api.sixaiy.com/v3/X712x2", key: "" },
+        sc: { url: "https://sentcord.com/api/bot/X712x2", key: "" },
+        gr: { url: "https://gensokyoradio.net/api/station/playing", key: "" },
+        cb: { url: "https://carbonitex.net/discord/data/botdata.php", key: "" },
+        top: { url: "https://top.gg/api/bots/X712x2/stats", key: "-" },
+        dbgg: { url: "https://discord.bots.gg/api/v1/bots/X712x2/stats", key: "" },
+        dbl: { url: "https://discordbotlist.com/api/v1/bots/X712x2/stats", key: "" },
+        dls: { url: "https://api.discordlist.space/v2/bots/X712x2", key: "" }
     },
 
     // Web Settings
-    w: {
-        port: 5501,
-        p: { 
-            gr: "https://gensokyoradio.net/playing",
-            n: "http://status.sixaiy.com", 
-            s: "https://discord.gg/C3vRDBU5kR", 
-            i: "https://discord.com/oauth2/authorize?client_id=302857939910131712&scope=bot%20applications.commands&permissions=305261734",
-            ei: "https://discord.com/oauth2/authorize?client_id=875548889137176597&scope=bot%20applications.commands&permissions=305261734"
+    web: {
+        port: 4000,6
+        links: { 
+            bladenode: "https://bladenode.com",
+            radio: "https://gensokyoradio.net/playing",
+            network: "http://status.sixaiy.com", 
+            discord: "https://discord.gg/C3vRDBU5kR", 
+            telegram: "https://t.me/joinchat/rfWlbVpfv_02OWFl",
+            gensokyobot: "https://discord.com/oauth2/authorize?client_id=302857939910131712&scope=bot%20applications.commands&permissions=305261734",
         }
     }
 };
