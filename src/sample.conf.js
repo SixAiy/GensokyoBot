@@ -11,10 +11,6 @@ module.exports = {
         guild: "", // Home Guild
         color: 0x421250 // Color
     },
-    telegram: {
-        token: "",
-        prefix: "/", // Default Prefix
-    },
     // URLs
     lists: {
         sa: { url: "https://api.sixaiy.com/v3/X712x2", key: "" },
@@ -29,7 +25,7 @@ module.exports = {
 
     // Web Settings
     web: {
-        port: 4000,6
+        port: 4000,
         links: { 
             bladenode: "https://bladenode.com",
             radio: "https://gensokyoradio.net/playing",

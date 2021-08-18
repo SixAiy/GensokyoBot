@@ -9,9 +9,7 @@ let
 mod.command("stab", {
     feature: "Shows a anime gif of stabbing",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
-        if(type == "tg") return app.tg.sendMessage(msg.chat.id, "Coming Soon!");
-
+    func: async function(app, msg, args, rank) {
         let 
             imgs = [
                 'https://i.imgur.com/VjggulR.gif',
@@ -35,9 +33,7 @@ mod.command("stab", {
 mod.command("facedesk", {
     feature: "Gif of Anime facedesking",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
-        if(type == "tg") return app.tg.sendMessage(msg.chat.id, "Coming Soon!");
-
+    func: async function(app, msg, args, rank) {
         let 
             imgs = [
                 "https://i.imgur.com/csdvorU.gif",
@@ -66,9 +62,7 @@ mod.command("facedesk", {
 mod.command("hug", {
     feature: "You can hug someone",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
-        if(type == "tg") return app.tg.sendMessage(msg.chat.id, "Coming Soon!");
-
+    func: async function(app, msg, args, rank) {
         let 
             imgs = [
                 "https://i.imgur.com/JrnxI9M.gif",
@@ -104,9 +98,7 @@ mod.command("hug", {
 mod.command("pat", {
     feature: "Pat someone",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
-        if(type == "tg") return app.tg.sendMessage(msg.chat.id, "Coming Soon!");
-
+    func: async function(app, msg, args, rank) {
         let 
             imgs = [
                 'https://i.imgur.com/Iye3UIa.png',
@@ -168,9 +160,7 @@ mod.command("pat", {
 mod.command("roll", {
     feature: "You roll around",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
-        if(type == "tg") return app.tg.sendMessage(msg.chat.id, "Coming Soon!");
-
+    func: async function(app, msg, args, rank) {
         let
             imgs = [
                 'https://i.imgur.com/7sLGFSl.gif',
@@ -221,9 +211,7 @@ mod.command("roll", {
 mod.command("anime", {
     feature: "shows a gif of Animeeee!!",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
-        if(type == "tg") return app.tg.sendMessage(msg.chat.id, "Coming Soon!");
-
+    func: async function(app, msg, args, rank) {
         let em = app.bot.makeEmbed();
 
         em.color(conf.discord.color);

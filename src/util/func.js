@@ -3,72 +3,6 @@
 const conf = require('../conf');
 
 module.exports = async(m) => {
-    // Interaction Create Commands
-    m.bot.createSlashComamnd = async() => {
-        let 
-            plug = m.modman.pluginlist,
-            mods = m.modman.getPlugins(),
-            output = [];
-
-        mods.map(async(x) => {
-            let 
-                d = plug[x].mod.getAllCommands(),
-                c = d.map(async(l) => {
-                    if(l.name != "" || l.name != null || n != "" || n != null) {
-                        return { name: l.name, desc: l.desc }
-                    }
-                });
-                f = c.filter((e) => { return e != null });
-            output.push(f);
-        });
-        for(let o of output) {
-            m.bot.slashCmd.registerCommand(`${conf.discord.slashPrefix}${o.name}`);
-            await new Promise((res) => setTimeout(res, 5000));
-        }
-    };   
-    /*
-    m.bot.createSlashs = async() => {
-        let 
-            plugins = m.modman.pluginslist,
-            mods = m.modman.getPlugins(),
-            output = {} 
-            
-            mods.map(async (m) => {
-                let 
-                    mdata = plugins[m].modman.getAllCommands(),
-                    cmds = mdata.map(async(md) => { 
-                        if(0 >= md.rank) {   
-                            if(md.name != "" || md.name != null || name != "" || name != null) 
-                            return { name: `,,${md.name}`, desc: md.desc }
-                        }
-                    });
-                output = cmds.filter((e) => { return e != null });
-            });
-        for(let cmd of output) {
-            m.bot.createCommand({
-                name: cmd.name,
-                description: cmd.desc,
-                options: [],
-                type: 1
-            });
-            await new Promise((res) => setTimeout(res, 5000));
-        }
-    };
-    */
-
-    // interactionCreate Handlers
-    m.bot.getICommand = async(msg, app) => {
-        let 
-            lvl = m.bot.plvl("i", inter),
-            r = undefined;
-        for(let p in app.bot.core._plugins) {
-            r = app.bot.core._plugins[p].module.getCmdI(inter, m);
-            if(r != undefined) {
-                if(lvl >= r.cmd.rank) r.cmd.func("tg", msg, app, r.res.args || "");
-            }
-        }
-    };
-
     // messageCreate Handlers
     m.bot.getCommand = (msg, app) => {
         msg.prefix = conf.discord.prefix;
@@ -89,7 +23,7 @@ module.exports = async(m) => {
                 res = r;
                 if(level >= res.cmd.rank) {
                     let args = res.res.args || "";
-                    res.cmd.func("dis", app, msg, args, systemLevel);
+                    res.cmd.func(app, msg, args, systemLevel);
                 }
             }
         }

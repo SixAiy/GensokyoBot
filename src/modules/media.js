@@ -11,9 +11,7 @@ mod.alias("join", "play");
 mod.command("play", {
     feature: "Plays the music in the voice channel your in",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
-        if(type == "tg") return app.tg.sendMessage(msg.chat.id, "This feature is coming soon!");
-    
+    func: async function(app, msg, args, rank) {    
         let 
             perm = msg.channel.guild.members.get(app.bot.user.id),
             vc = msg.member.voiceState.channelID,
@@ -47,7 +45,7 @@ mod.alias("info", "now");
 mod.command("now", {
     feature: "Displays the current song",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
+    func: async function(app, msg, args, rank) {
         let 
             gr = await fetch(conf.lists.gr.url).then(r => r.json()),
             current = {
@@ -78,7 +76,6 @@ mod.command("now", {
         if(durS < 10) durS = "0" + durS;
         if(xdurS < 10) xdurS = "0" + xdurS;
 
-        if(type == "dis") {
             let em = app.bot.makeEmbed();
             em.color(conf.discord.color);
             em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/static/images/partners/gr.png", conf.web.links.radio)
@@ -96,11 +93,6 @@ mod.command("now", {
             em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
 
             msg.channel.createEmbed(em);
-
-        }
-        if(type == "tg") {
-            return app.tg.sendMessage(msg.chat.id, "Coming Soon!");
-        }
     }
 });
 
@@ -111,8 +103,7 @@ mod.alias("shutup", "stop");
 mod.command("stop", {
     feature: "Stops the music",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
-        if(type == "tg") return app.tg.sendMessage(msg.chat.id, "This feature is coming soon!");
+    func: async function(app, msg, args, rank) {
 
         let 
             guild = msg.channel.guild,

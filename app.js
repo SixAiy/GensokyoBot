@@ -12,10 +12,7 @@ const fleetSettings = {
     path: path.join(__dirname, "./src/app/discord.js"), 
     token: conf.discord.token, 
     fetchTimeout: 300000,
-    services: [
-        //{ name: "telegram", path: path.join(__dirname, "./src/app/telegram.js") },
-        { name: "Web", path: path.join(__dirname, "./src/app/web.js") },
-    ]
+    services: [{ name: "Web", path: path.join(__dirname, "./src/app/web.js") }]
 };
 const Master = new Fleet(fleetSettings);
 

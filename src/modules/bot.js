@@ -12,67 +12,44 @@ mod.alias("invite", "help");
 mod.command("help", {
     feature: "Shows a list of all commands and information",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
+    func: async function(app, msg, args, rank) {
         let 
             web = "https://gensokyobot.com",
             output = "",
             totalCmds = "",
             usableCmds = "",
-            mods = app.modman.getPlugins();
+            mods = app.modman.getPlugins(),
+            em = app.bot.makeEmbed();
 
-        if(type = "dis") {
-            let em = app.bot.makeEmbed();
+        em.field("Help & Support", `[Commands](${web}/commands)\n[Support](https://gensokyobot.com/support)\n[Status](http://status.sixaiy.com)`, true);
+        em.field(`Get GensokyoBot`, `[Add GensokyoBot](${web}/invite)\n[Add GensokyoBot EX](${web}/inv/ex)`, true);
 
-            em.field("Help & Support", `[Commands](${web}/commands)\n[Support](https://gensokyobot.com/support)\n[Status](http://status.sixaiy.com)`, true);
-            em.field(`Get GensokyoBot`, `[Add GensokyoBot](${web}/invite)\n[Add GensokyoBot EX](${web}/inv/ex)`, true);
+        mods.map((m) => {
+            let 
+                data = app.bot.core._plugins[m].mod.getAllCommands(),
+                name = "",
+                loaded = data.map((md) => {
+                    totalCmds++
+                    if(rank.level >= md.rank) {
+                        let fix = m.charAt(0).toUpperCase() + m.slice(1);
+                        name = fix.replace(/\.js$/i, "");
+                        usableCmds++
+                        return (`${md.name}`);
+                    }
+                });
+            output += em.field(name, `\`\`\`\n${loaded.join(", ")}\`\`\``, false);
+         });
+        em.thumbnail(msg.channel.guild.iconURL);
+        em.description(`Hay **${msg.author.username}**\nYou can show your prefix anytime by mentioning me.`);
+        em.field(`Bot Rank`, `${rank.level} (${rank.friendly})`, true);
+        em.field(`You're Prefix`, `\`${msg.prefix}\``, true);
+        em.field(`Commands`, `**${usableCmds}** Usable / **${totalCmds}** Total`, true);
+        em.color(conf.discord.color);
+        em.author(`Server: ${msg.channel.guild.name}`);
+        em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
+        em.timestamp();
 
-            mods.map((m) => {
-                let 
-                    data = app.bot.core._plugins[m].mod.getAllCommands(),
-                    name = "",
-                    loaded = data.map((md) => {
-                        totalCmds++
-                        if(rank.level >= md.rank) {
-                            let fix = m.charAt(0).toUpperCase() + m.slice(1);
-                            name = fix.replace(/\.js$/i, "");
-                            usableCmds++
-                            return (`${md.name}`);
-                        }
-                    });
-                output += em.field(name, `\`\`\`\n${loaded.join(", ")}\`\`\``, false);
-            });
-            em.thumbnail(msg.channel.guild.iconURL);
-            em.description(`Hay **${msg.author.username}**\nYou can show your prefix anytime by mentioning me.`);
-            em.field(`Bot Rank`, `${rank.level} (${rank.friendly})`, true);
-            em.field(`You're Prefix`, `\`${msg.prefix}\``, true);
-            em.field(`Commands`, `**${usableCmds}** Usable / **${totalCmds}** Total`, true);
-            em.color(conf.discord.color);
-            em.author(`Server: ${msg.channel.guild.name}`);
-            em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
-            em.timestamp();
-
-            msg.channel.createEmbed(em);
-        }
-        if(type == "tg") {
-            mods.map((m) => {
-                let 
-                    data = app.tg._plugins[m].mod.getAllCommands(),
-                    name = "",
-                    loaded = data.map((md) => {
-                        totalCmds++
-                        if(rank.level >= md.rank) {
-                            let fix = m.charAt(0).toUpperCase() + m.slice(1);
-                            name = fix.replace(/\.js$/i, "");
-                            usableCmds++
-                            return (`${md.name}`);
-
-                        }
-                    });
-                output += `Heres the list of commands\n\n${loaded.join(',')}`
-            });
-
-            app.tg.sendMesage(msg.chat.id, output); 
-        }
+        msg.channel.createEmbed(em);
     }
 });
 
@@ -82,9 +59,8 @@ mod.alias("status", "stats");
 mod.command("stats", {
     feature: "Shows Ping, Status and much more information regarding the bot.",
     rank: 0,
-    func: async function(type, app, msg, args, rank) {
+    func: async function(app, msg, args, rank) {
         let ping = Date.now();
-        if(type == "dis") {
             msg.channel.createMessage("Loading Statistics").then(async (m) => {
                 m.delete();
                 let 
@@ -108,8 +84,6 @@ mod.command("stats", {
                 
                 msg.channel.createEmbed(em);
             });
-        }
-        if(type == "tg") return app.tg.sendMesage("This feature is only avliable on Discord");
     }
 });
 
@@ -117,8 +91,7 @@ mod.alias("m", "bot");
 mod.command("bot", {
     feature: "Owner stuff will only work for the owner!",
     rank: 7,
-    func: async function(type, app, msg, args, rank) {
-        if(type == "dis") {
+    func: async function(app, msg, args, rank) {
             let cmd = args.split(' ');
             if(!cmd[0]) {
                 let em = app.bot.makeEmbed();
@@ -215,8 +188,6 @@ mod.command("bot", {
                     msg.channel.createEmbed(em);
                 }
             }
-        }
-        if(type == "tg") return app.tg.sendMesage(msg.chat.id, "This feature is only allowed on Discord.");
     }
 });
 
