@@ -1,4 +1,4 @@
-# GensokyoBot
+# GensokyoBot [![Github commits (since latest release)](https://img.shields.io/github/commits-since/SixAiy/GensokyoBot/latest.svg)]() [![Twitter Follow](https://img.shields.io/twitter/follow/sixaiy.svg?style=social&label=Follow)](https://twitter.com/sixaiy)
 
 ## Pull requests
 Pull requests are welcome and please report any issues you find in [issues](https://github.com/SixAiy/GensokyoBot/issues).
