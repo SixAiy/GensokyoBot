@@ -7,8 +7,11 @@ let
     { clear } = require("console"),
     conf = require('./src/conf');
 
-const fleetSettings = { 
-    name: "GensokyoBot", path: path.join(__dirname, "./src/app/discord.js"), token: conf.discord.token, 
+const fleetSettings = {
+    name: "GensokyoBot", 
+    path: path.join(__dirname, "./src/app/discord.js"), 
+    token: conf.discord.token, 
+    fetchTimeout: 300000,
     services: [
         //{ name: "telegram", path: path.join(__dirname, "./src/app/telegram.js") },
         { name: "Web", path: path.join(__dirname, "./src/app/web.js") },

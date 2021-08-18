@@ -157,7 +157,7 @@ class Admiral extends events_1.EventEmitter {
         }
         if (this.clusterCount === "auto")
             this.clusterCount = os_1.cpus().length;
-        this.eris = new Eris.Client(this.token, { getAllUsers: true, intents: ["guilds", "guildMembers", "guildMessages"]});
+        this.eris = new Eris.Client(this.token, { getAllUsers: true, intents: ["guilds", "guildMembers", "guildMessages", "guildIntegrations"]});
         this.launch();
         if (master.isMaster) {
             cluster_1.on("message", (worker, message) => {

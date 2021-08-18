@@ -13,7 +13,7 @@
     "cluster": "^0.7.7",
     "console": "^0.7.2",
     "ejs": "^3.1.6",
-    "eris": "^0.15.1",
+    "eris": "github:DonovanDMC/eris#everything",
     "events": "^3.3.0",
     "express": "^4.17.1",
     "fs": "^0.0.1-security",
@@ -24,7 +24,6 @@
     "os": "^0.1.2",
     "path": "^0.12.7",
     "resolve": "^1.20.0",
-    "slash-create": "^3.5.0",
     "underscore": "^1.13.1",
     "util": "^0.12.4"
   }

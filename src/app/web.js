@@ -1,5 +1,7 @@
 "use strict"
 
+const { throws } = require('assert');
+
 let 
     // Packages
     express = require('express'),
@@ -30,59 +32,59 @@ module.exports = class ServiceWorker extends BaseServiceWorker {
         this.web.use(bodyParser.json());
         this.web.use(bodyParser.urlencoded({ extended: true }));
 
-
         this.buildPage("/", "Home", "index");
         this.buildPage("/cmds", "Commands", "cmds");
-        //this.buildPage("/team", "Team", "team");
-        this.buildPage("/privacy", "Privacy Policy", "privacy");
-        this.redirectPage("/team", "/");
+        this.buildPage('/music', "Now Playing", "music");
+        this.buildPage("/team", "Team", "team");
+        this.buildPage("/privacy", "Privacy Policy", "inc/legal/privacy");
+        //this.buildPage("/terms", "Terms of Use", "inc/legal/terms");
+        //this.buildPage("/dmca", "Copyright Infringement Policy (DMCA)", "inc/legal/dmca");
+
+    
         this.redirectPage('/sponsor', conf.web.links.bladenode);
-        this.redirectPage('/playing', conf.web.links.radio);
         this.redirectPage("/status", conf.web.links.network);
-        this.redirectPage("/support", conf.web.links.support);
-        this.redirectPage("/inv/gb", conf.web.links.gensokyobot);
-        this.redirectPage("/inv/ex", conf.web.links.gbextreme);
+        this.redirectPage("/discord", conf.web.links.discord);
+        this.redirectPage('/telegram', conf.web.links.telegram);
+        this.redirectPage("/invite", conf.web.links.gensokyobot);
 
         // API Functions
-        this.web.get("/api/commands", async(req, res) => {
+        this.web.get("/api/cmds", async(req, res) => {
             let 
                 output = {},
-                mods = this.modman.getPlugins(),
-                x = {};
+                mods = this.modman.getPlugins();
 
             mods.map((m) => {
                 let 
                     d = this._plugins[m].mod.getAllCommands(),
-                    a = this._plugins[m].mod.getAllAliases(),
                     name = "",
-                    aliases = a.map((md) => {
-                        return md
-                    }),
                     cmds = d.map((md) => {
                         if(0 >= md.rank) {
                             name = m.replace(/\.js$/i, "");
                             if(md.name != "" || md.name != null || name != "" || name != null) {
-                                return { cmd: md.name, alias: md.alias, desc: md.feature }
+                                return { cmd: md.name, desc: md.feature }
                             }
                         }
                     });
                 
                 output[name] = cmds.filter((e) => { return e != null });
-                x[name] = aliases.filter((e) => { return e != null }); 
             });
-            res.json({ x, output });
+            res.json(output);
         });
         this.web.get("/api/playing", async(req, res) => {
             let x = await fetch(conf.lists.gr.url).then(r => r.json());
             res.json(x);
         });
+        this.web.get("/api/stats", async(req, res) => {
+            let stats = await this.ipc.getStats();
+            res.json(stats);
+        });
 
         this.web.listen(conf.web.port, () => this.serviceReady());
 
     }
-    async buildPage(url, title, file) {
+    async buildPage(url, title, file, data) {
         this.web.get(url, async(req, res) => {
-            res.render(path.resolve(`${site}/${file}.ejs`), { title });
+            res.render(path.resolve(`${site}/${file}.ejs`), { title, data: data });
         });
     }
     async redirectPage(url, redirect) {

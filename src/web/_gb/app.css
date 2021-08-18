@@ -438,14 +438,14 @@ pre {
 }
 
 body {
-	color: #4a4a4a;
+	color: #d3d3d3;
 	font-size: 1em;
 	font-weight: 400;
 	line-height: 1.5
 }
 
 a {
-	color: #b162e8;
+	color: #d3d3d3;
 	cursor: pointer;
 	text-decoration: none
 }
@@ -455,7 +455,7 @@ a strong {
 }
 
 a:hover {
-	color: #4d2c5b
+	color: #b162e8
 }
 
 code {
@@ -2696,7 +2696,7 @@ fieldset[disabled] .button {
 .content h4,
 .content h5,
 .content h6 {
-	color: #363636;
+	color: #d3d3d3;
 	font-weight: 600;
 	line-height: 1.125
 }
@@ -5986,9 +5986,9 @@ print {
 }
 
 .card {
-	background-color: #111;
+	background-color: #282828;
 	box-shadow: 0 .5em 1em -.125em rgba(10, 10, 10, .1), 0 0 0 1px rgba(10, 10, 10, .02);
-	color: #4a4a4a;
+	color: #d3d3d3;
 	max-width: 100%;
 	position: relative
 }
@@ -6806,7 +6806,7 @@ print {
 }
 
 .navbar.is-black {
-	background-color: #0a0a0a;
+	background-color: #282828;
 	color: #fff
 }
 
@@ -6821,7 +6821,7 @@ print {
 .navbar.is-black .navbar-brand .navbar-link:focus,
 .navbar.is-black .navbar-brand .navbar-link:hover,
 .navbar.is-black .navbar-brand .navbar-link.is-active {
-	background-color: #000;
+	background-color: #353535;
 	color: #fff
 }
 
@@ -6852,7 +6852,7 @@ print {
 	.navbar.is-black .navbar-end .navbar-link:focus,
 	.navbar.is-black .navbar-end .navbar-link:hover,
 	.navbar.is-black .navbar-end .navbar-link.is-active {
-		background-color: #000;
+		background-color: #353535;
 		color: #fff
 	}
 	.navbar.is-black .navbar-start .navbar-link::after,
@@ -6866,7 +6866,7 @@ print {
 		color: #fff
 	}
 	.navbar.is-black .navbar-dropdown a.navbar-item.is-active {
-		background-color: #0a0a0a;
+		background-color: #353535;
 		color: #fff
 	}
 }
@@ -12761,7 +12761,7 @@ print {
 }
 
 .hero.is-primary {
-	background-color: #19002f;
+	background-color: #1a1537;
 	color: #fff
 }
 
@@ -13713,6 +13713,6 @@ print {
 }
 
 .footer {
-	background-color: #111;
+	background-color: #222;
 	padding: 3rem 1.5rem 6rem
 }

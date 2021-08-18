@@ -4,6 +4,7 @@ var grVol, t, tt, previousTitle, duration, played, remaining, currentSongId;
 var recheck = 0;
 var currentSelectedRating = 0;
 var currentSongFavorite = 0;
+var hostname = "http://localhost:5501"
 
 function getCookie(cname) {
     var name = cname + "=";
@@ -23,10 +24,10 @@ function navPositionCheck() {
     if ((aTop - aCur) < 0) {
         if (!navIsSolid) {
             $("#navTop").animate({
-                backgroundColor: "#111111cc"
+                backgroundColor: "rgba(62, 15, 75, 0.8)"
             }, "fast");
             $("#navBot").animate({
-                backgroundColor: "#111111cc"
+                backgroundColor: "rgba(62, 15, 75, 0.8)"
             }, "fast");
             navIsSolid = true;
         }
@@ -134,29 +135,6 @@ function getNowPlaying() {
             }
             previousTitle = title;
             recheck = 0;
-            $("#ratinginfo").fadeOut(500, function() {
-                $.get("/js/get_rating.php", {
-                    songid: currentSongId
-                }, function(data) {
-                    ratingSelectOutput(data);
-                });
-                $(this).fadeIn(600);
-            });
-            $("#favorite_icon").fadeOut(500, function() {
-                $.get("/js/get_favorite.php", {
-                    songid: currentSongId
-                }, function(data) {
-                    console.log(data);
-                    if (data == "1") {
-                        $("#favorite_icon").attr('src', '/images/assets/favorite_1.png');
-                        currentSongFavorite = 1;
-                    } else {
-                        $("#favorite_icon").attr('src', '/images/assets/favorite_0.png');
-                        currentSongFavorite = 0;
-                    }
-                });
-                $(this).fadeIn(600);
-            });
         } else {
             recheck++;
             var n;
@@ -180,6 +158,13 @@ function getNowPlaying() {
             clearTimeout(t);
             t = setTimeout(getNowPlaying, (n * 1000));
         }
+    });
+}
+
+function getCommands() {
+    if(window.location.href != `${hostname}/cmds`) return;
+    $.getJSON("/api/cmds", (d) => {
+
     });
 }
 
@@ -212,250 +197,6 @@ function setCookie(cname, cvalue, exdays) {
     document.cookie = cname + "=" + cvalue + "; path=/; " + expires;
 }
 
-function matchCountry() {
-    var val = $("#country").val();
-    var obj = $("#countries").find("option[value='" + val + "']");
-    if (obj != null && obj.length > 0) {
-        if (val == "United States (Domestic and APO/FPO/DPO Mail)") {
-            $("#usZipCode").css("display", "block");
-            var zipVal = $("#zipCode").val();
-            var validZip = /(^\d{5}$)|(^\d{5}-\d{4}$)/.test(zipVal);
-            if (validZip) {
-                $("#calculateBtn").prop("disabled", false);
-            } else {
-                $("#calculateBtn").prop("disabled", true);
-                $("#checkout").prop("disabled", true);
-            }
-        } else {
-            $("#usZipCode").css("display", "none");
-            $("#calculateBtn").prop("disabled", false);
-        }
-    } else {
-        $("#checkout").prop("disabled", true);
-        $("#calculateBtn").prop("disabled", true);
-    }
-    $("#shippingTotal").html("(calculate)");
-    $("#shippingOptionsResponse").html("");
-    $("#shippingOptionsTitle").css("display", "none");
-}
-
-function calculateShip() {
-    $("#calculateBtn").addClass("is-loading");
-    var country = $("#country").val();
-    var zipCode = $("#zipCode").val();
-    $.post("calculateShipping.php", {
-        "country": country,
-        "zipCode": zipCode
-    }).done(function(data) {
-        $("#shippingOptionsTitle").css("display", "block");
-        $("#shippingOptionsResponse").html(data);
-        $("#calculateBtn").removeClass("is-loading");
-        $("#calculateBtn").prop("disabled", true);
-    }).fail(function() {});
-}
-
-function calculateDisc() {
-    $("#calculateDisc").addClass("is-loading");
-    $.post("calculateDiscount.php", function(data) {});
-}
-
-function shippingSelected() {
-    var value = $('input[name="selectedShipping"]:checked').val();
-    $("#shippingTotal").html("$" + value);
-    var subTotal = $("#subTotal").html().substring(1);
-    var discountAmt = $("#discountTotal").html().substring(1);
-    var gTotal = 0;
-    if (isNaN(discountAmt)) {
-        gTotal = usdFormat(parseFloat(value) + parseFloat(subTotal));
-    } else {
-        gTotal = usdFormat(parseFloat(value) + parseFloat(subTotal) - parseFloat(discountAmt));
-    }
-    $("#grandTotal").html("$" + gTotal);
-    $("#checkout").prop("disabled", false);
-    $("#calculateBtn").prop("disabled", true);
-    $.post('storeShipping.php', {
-        'shipping': value
-    });
-}
-
-function usdFormat(number) {
-    console.log(number);
-    number = number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    return number;
-}
-
-function modalToggleLogin() {
-    $("#modalLoginContainer").toggleClass('is-active');
-}
-
-function modalToggleDob() {
-    $("#modalDobContainer").toggleClass('is-active');
-}
-
-function modalToggleTerms() {
-    $("#modalTermsContainer").toggleClass('is-active');
-}
-
-function modalTogglePrivacy() {
-    $("#modalPrivacyContainer").toggleClass('is-active');
-}
-
-function login() {
-    $("#modalLogin").addClass("is-loading");
-    let user = $("#user").val();
-    let pass = $("#pass").val();
-    $.post("/login/loginProcess.php", {
-        user: user,
-        pass: pass
-    }, function(data) {
-        $("#modalLogin").removeClass("is-loading");
-        if (data.error) {
-            if (data.userError != "") {
-                $("#userError").html(data.userError);
-            }
-            if (data.passError != "") {
-                $("#passError").html(data.passError);
-            }
-        } else {
-            $("#loginInfo").html(data.info);
-            modalToggleLogin();
-        }
-    }, "JSON");
-}
-
-function rating_hover(stars) {
-    ratingSelectOutput(stars);
-}
-
-function rating_out() {
-    ratingSelectOutput(currentSelectedRating);
-}
-
-function rating_click(stars) {
-    $.get("/js/rating.php", {
-        songid: currentSongId,
-        rating: stars
-    }, function(data) {
-        var delayAmt = 2500;
-        switch (data) {
-            case "1":
-                $("#rating_desc").html("You are not logged in.").show().delay(delayAmt).fadeOut();
-                break;
-            case "2":
-                $("#rating_desc").html("Not connected to station.").show().delay(delayAmt).fadeOut();
-                break;
-            case "3":
-                $("#rating_desc").html("Invalid rating.").show().delay(delayAmt).fadeOut();
-                break;
-            case "4":
-                $("#rating_desc").html("Rating not submit (bad song ID).").show().delay(delayAmt).fadeOut();
-                break;
-            case "5":
-                $("#rating_desc").html("Rating not submit (not a recent song).").show().delay(delayAmt).fadeOut();
-                break;
-            case "6":
-                $("#rating_desc").html("Thanks for rating!").show().delay(delayAmt).fadeOut();
-                currentSelectedRating = stars;
-                break;
-            default:
-                $("#rating_desc").html("Rating not submit (unknown error).").show().delay(delayAmt).fadeOut();
-        }
-    });
-    ratingSelectOutput(stars);
-}
-
-function ratingSelectOutput(stars) {
-    switch (stars) {
-        case 0:
-            $("#rating_star_1").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_2").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_3").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_4").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_5").attr('src', '/images/assets/rating_star_none.png');
-            break;
-        case 1:
-            $("#rating_star_1").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_2").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_3").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_4").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_5").attr('src', '/images/assets/rating_star_none.png');
-            break;
-        case 2:
-            $("#rating_star_1").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_2").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_3").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_4").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_5").attr('src', '/images/assets/rating_star_none.png');
-            break;
-        case 3:
-            $("#rating_star_1").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_2").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_3").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_4").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_5").attr('src', '/images/assets/rating_star_none.png');
-            break;
-        case 4:
-            $("#rating_star_1").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_2").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_3").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_4").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_5").attr('src', '/images/assets/rating_star_none.png');
-            break;
-        case 5:
-            $("#rating_star_1").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_2").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_3").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_4").attr('src', '/images/assets/rating_star.png');
-            $("#rating_star_5").attr('src', '/images/assets/rating_star.png');
-            break;
-        default:
-            $("#rating_star_1").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_2").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_3").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_4").attr('src', '/images/assets/rating_star_none.png');
-            $("#rating_star_5").attr('src', '/images/assets/rating_star_none.png');
-    }
-}
-
-function favorite_click(favId) {
-    var fromPlayer = false;
-    if (favId == null) {
-        fromPlayer = true;
-        favId = currentSongId;
-    }
-    var delayAmt = 2500;
-    if (currentSongFavorite == 0) {
-        $.post("/js/add_favorite.php", {
-            id: favId
-        }, function(data) {
-            console.log(data);
-            if (data.RESULT == "Success") {
-                if (fromPlayer) {
-                    $("#favorite_icon").attr('src', '/images/assets/favorite_1.png');
-                    $("#rating_desc").html("Song added as favorite").show().delay(delayAmt).fadeOut();
-                    currentSongFavorite = 1;
-                }
-            } else {
-                $("#rating_desc").html(data.ERROR).show().delay(delayAmt).fadeOut();
-            }
-        });
-    } else {
-        $.post("/js/remove_favorite.php", {
-            id: favId
-        }, function(data) {
-            console.log(data);
-            if (data.RESULT == "Success") {
-                if (fromPlayer) {
-                    $("#favorite_icon").attr('src', '/images/assets/favorite_0.png');
-                    $("#rating_desc").html("Song removed from favorites").show().delay(delayAmt).fadeOut();
-                    currentSongFavorite = 0;
-                }
-            } else {
-                $("#rating_desc").html(data.ERROR).show().delay(delayAmt).fadeOut();
-            }
-        });
-    }
-}
 $(function() {
     navInitialPositionCheck();
     getNowPlaying();
@@ -472,16 +213,8 @@ $(function() {
         $(".navbar-burger").toggleClass("is-active");
         $(".navbar-menu").toggleClass("is-active");
     });
-    $("#volSlider").on("input change", function() {
-        grVol = $(this).val();
-        $("#songVolPercent").html(Math.round(grVol * 100) + "%");
-        adjustVolume(grVol);
-    });
     $(window).resize(function() {
         screenWidth = $(window).width();
-    });
-    document.getElementById("loginModalOpenBtn").addEventListener("click", function(event) {
-        event.preventDefault();
     });
 });
 document.addEventListener('DOMContentLoaded', () => {

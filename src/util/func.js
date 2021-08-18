@@ -1,6 +1,6 @@
 "use strict"
 
-let conf = require('../conf');
+const conf = require('../conf');
 
 module.exports = async(m) => {
     // Interaction Create Commands
@@ -153,6 +153,14 @@ module.exports = async(m) => {
         return segments.join(', ');
     }
 
+    // Slash Creator
+    m.bot.getAppInteration = (guild) => {
+        let app = m.bot.api.applications(bot.user.id);
+        if(guild) app.guilds(guild);
+        return app;
+    }
+
+
     // Post Stats to listing site
     m.bot.postStatsList = async(type, key, app, url) => {
 
@@ -233,5 +241,6 @@ module.exports = async(m) => {
             check: (app, msg) => conf.discord.owners.includes(msg.author.id)
         }
     ];
+
 
 }
