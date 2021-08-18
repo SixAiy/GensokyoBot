@@ -21,7 +21,6 @@
 let 
     mod = require('../util/mod').module("bot"),
     conf = require('../conf'),
-    moment = require("moment"),
     util = require('util'),
     os = require("os");
 
