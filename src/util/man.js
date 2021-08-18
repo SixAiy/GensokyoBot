@@ -1,3 +1,19 @@
+/*
+#####################################################################
+# File: man.js
+# Title: A simple file manager
+# Author: sorch/theholder <sorch@protonmail.ch>
+# Version: 2020.p1
+#####################################################################
+
+#####################################################################
+# License
+#####################################################################
+# Copyright 2020 Contributing Authors
+# This program is distributed under the terms of the GNU GPL.
+######################################################################
+*/
+
 var fs = require("fs");
 var resolve = require('resolve');
 var _ = require("underscore");
@@ -69,55 +85,3 @@ ModuleManager.prototype.getPlugins = function() {
 	return _.keys(this.pluginslist);
 };
 exports.ModuleManager = ModuleManager;
-
-/*
-
-"use strict"
-
-function Module(name) {
-    if(name == undefined) throw new Error("Module name undefined.");
-    this._name = name;
-    this._commands = [];
-    this._aliases = [];
-    this._description = {};
-    this._cmdPreview = {};
-};
-
-Module.prototype.getName = function() {
-    return this._name;
-};
-
-function makematch(name) {
-    let nsp = name.replace(/\./g, " ");
-    return function(body) {
-        if(body && body.prefix) {
-            let 
-                bdy = body.content.slice(body.prefix.length),
-                bsp = bdy.slice(0, name.length);
-            if((bsp.toLowerCase() === name.toLowerCase() || bsp.toLowerCase() === nsp.toLowerCase()) && (bdy.length === name.length || bdy[name.length] === " ")) {
-                return { type: "name", args: bdy.slice(name.length + 1)}
-            }
-        }
-    }
-}
-
-
-
-// Plugin loader
-let 
-    fs = require("fs"),
-    res = require('resolve'),
-    _ = require('underscore');
-
-function Plugin(path) {
-    this.plugins = {};
-    this.pathLocation = path;
-};
-Plugin.prototype.LoadPlugins = function() {
-    let Directory = fs.readFileSync(this.pathLocation);
-    Directory.forEach((fileName) => {
-        this.pluginsList[fileName] = require(`${this.pathLocation}${fileName}`);
-        this.Loaded(fileName);
-    });
-};
-*/

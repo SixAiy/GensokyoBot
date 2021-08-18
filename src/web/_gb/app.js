@@ -1,10 +1,28 @@
+/*
+#####################################################################
+# File: app.js
+# Title: A Radio Music Bot
+# Author: SixAiy <me@sixaiy.com>
+# Version: 0.5a
+# Description:
+#  A GensokyoRadio.net Discord bot for playing the radio on discord.
+#####################################################################
+
+#####################################################################
+# License
+#####################################################################
+# Copyright 2021 Contributing Authors
+# This program is distributed under the terms of the GNU GPL.
+######################################################################
+*/
+
 var navIsSolid = false;
 var screenWidth = $(window).width();
 var grVol, t, tt, previousTitle, duration, played, remaining, currentSongId;
 var recheck = 0;
 var currentSelectedRating = 0;
 var currentSongFavorite = 0;
-var hostname = "http://localhost:5501"
+var hostname = "http://localhost:4000"
 
 function getCookie(cname) {
     var name = cname + "=";

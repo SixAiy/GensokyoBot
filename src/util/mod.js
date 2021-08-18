@@ -1,3 +1,19 @@
+/*
+#####################################################################
+# File: mod.js
+# Title: A simple command handler for discord
+# Author: sorch/theholder <sorch@protonmail.ch>
+# Version: 2020.p1
+#####################################################################
+
+#####################################################################
+# License
+#####################################################################
+# Copyright 2020 Contributing Authors
+# This program is distributed under the terms of the GNU GPL.
+######################################################################
+*/
+
 function Module(name) {
     if (name === undefined) {
         throw new Error("Module name undefined.");
