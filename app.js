@@ -51,7 +51,7 @@ app.bot.on("error", (e) => {
 // Discord Events
 app.bot.on("ready", () => {
     app.func.interactionCommands(app);
-    app.bot.editStatus("online", conf.discord.status);
+    app.bot.editStatus(conf.game_status, { name: conf.game_name, type: conf.game_type });
     console.log("Discord", "Ready!");
     require('./src/web')(app); // Website
 });

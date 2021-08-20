@@ -28,7 +28,10 @@ module.exports = {
     bot_mod:                "",
     bot_owners:             [""], // Only place userIds in here.
     guild_id:               "",
-    game:                   "",
+
+    game_status:            "online",
+    game_name:              "",
+    game_type:              1,
 
     webhook_error_log:      "",
     webhook_guild_log:      "",
