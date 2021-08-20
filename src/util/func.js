@@ -27,6 +27,7 @@ module.exports = async(m) => {
 
     // messageCreate and interactionCreate Handler
     m.func.getCommand = (app, msg) => {
+        if(!msg.content && !msg.token) return;
         if(msg.member.user.bot) return;
         msg.pingstamp = new Date() / 1000;
 

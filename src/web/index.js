@@ -51,10 +51,10 @@ module.exports = (app) => {
             guild = app.bot.guilds.get(conf.guild_id),
             team = [],
             role = "",
-            team_roles = conf.bot_staff;
+            team_admin = conf.bot_admin,
+            team_mod = conf.bot_mod;
 
-        console.log(guild);
-        res.json(guild);
+        res.json({team_admin, team_mod, guild});
     });
     app.web.get('/cmds', async(req, res) => {
         let
