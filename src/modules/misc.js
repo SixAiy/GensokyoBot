@@ -19,15 +19,16 @@
 "use strict"
 
 let 
-    mod = require('../util/mod').module("misc"),
+    mod = require('../util/mod').Module("misc"),
     conf = require('../conf');
 
 
 // FUN COMMANDS
 mod.command("stab", {
-    feature: "Shows a anime gif of stabbing",
+    interaction: true,
+    desc: "Shows a anime gif of stabbing",
     rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(t, app, msg, args, rank) {
         let 
             imgs = [
                 'https://i.imgur.com/VjggulR.gif',
@@ -40,18 +41,19 @@ mod.command("stab", {
             ],
             rand = Math.floor(Math.random() * imgs.length),
             img = imgs[rand],
-            em = bot.makeEmbed();
+            em = app.bot.makeEmbed();
 
         em.color(conf.discord.color);
         em.image(img);
 
-        msg.channel.createEmbed(em);
+        app.bot.sendEmbed(t, msg, em);
     }
 });
 mod.command("facedesk", {
-    feature: "Gif of Anime facedesking",
+    interaction: true,
+    desc: "Gif of Anime facedesking",
     rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(t, app, msg, args, rank) {
         let 
             imgs = [
                 "https://i.imgur.com/csdvorU.gif",
@@ -66,21 +68,22 @@ mod.command("facedesk", {
                 "https://i.imgur.com/lfz4gYB.gif",
                 "https://i.imgur.com/VnptZ2X.gif",
                 "https://i.imgur.com/S85GSma.gif"
-            ]
+            ],
             rand = Math.floor(Math.random() * imgs.length),
             img = imgs[rand],
-            em = bot.makeEmbed();
+            em = app.bot.makeEmbed();
 
         em.color(conf.discord.color);
         em.image(img);
 
-        msg.channel.createEmbed(em);
+        app.bot.sendEmbed(t, msg, em);
     }
 });
 mod.command("hug", {
-    feature: "You can hug someone",
+    interaction: true,
+    desc: "You can hug someone",
     rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(t, app, msg, args, rank) {
         let 
             imgs = [
                 "https://i.imgur.com/JrnxI9M.gif",
@@ -105,18 +108,19 @@ mod.command("hug", {
             ],
             rand = Math.floor(Math.random() * imgs.length),
             img = imgs[rand],
-            em = bot.makeEmbed();
+            em = app.bot.makeEmbed();
 
         em.color(conf.discord.color);
         em.image(img);
 
-        msg.channel.createEmbed(em);
+        app.bot.sendEmbed(t, msg, em);
     }
 })
 mod.command("pat", {
-    feature: "Pat someone",
+    interaction: true,
+    desc: "Pat someone",
     rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(t, app, msg, args, rank) {
         let 
             imgs = [
                 'https://i.imgur.com/Iye3UIa.png',
@@ -172,13 +176,14 @@ mod.command("pat", {
         em.color(conf.discord.color);
         em.image(img);
 
-        msg.channel.createEmbed(em);
+        app.bot.sendEmbed(t, msg, em);
     }
 });
 mod.command("roll", {
-    feature: "You roll around",
+    interaction: true,
+    desc: "You roll around",
     rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(t, app, msg, args, rank) {
         let
             imgs = [
                 'https://i.imgur.com/7sLGFSl.gif',
@@ -223,19 +228,20 @@ mod.command("roll", {
         em.color(conf.discord.color);
         em.image(img);
 
-        msg.channel.createEmbed(em);
+        app.bot.sendEmbed(t, msg, em);
     }
 });
 mod.command("anime", {
-    feature: "shows a gif of Animeeee!!",
+    interaction: true,
+    desc: "shows a gif of Animeeee!!",
     rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(t, app, msg, args, rank) {
         let em = app.bot.makeEmbed();
 
         em.color(conf.discord.color);
         em.image("http://i.imgur.com/93VahIh.png");
 
-        msg.channel.createEmbed(em);
+        app.bot.sendEmbed(t, msg, em);
     }
 });
 

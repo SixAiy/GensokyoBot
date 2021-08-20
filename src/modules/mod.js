@@ -19,7 +19,7 @@
 "use strict"
 
 let 
-    mod = require('../util/mod').module("mod"),
+    mod = require('../util/mod').Module("mod"),
     fetch = require('node-fetch');
 
 

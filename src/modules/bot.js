@@ -19,7 +19,8 @@
 "use strict"
 
 let 
-    mod = require('../util/mod').module("bot"),
+    mod = require('../util/mod').Module("bot"),
+    //mod = require('../util/mod').module("bot"),
     conf = require('../conf'),
     util = require('util'),
     os = require("os");
@@ -27,9 +28,10 @@ let
 mod.alias("commands", "help");
 mod.alias("invite", "help");
 mod.command("help", {
-    feature: "Shows a list of all commands and information",
+    interaction: true,
+    desc: "Shows a list of all commands and information",
     rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(t, app, msg, args, rank) {
         let 
             web = "https://gensokyobot.com",
             output = "",
@@ -40,6 +42,7 @@ mod.command("help", {
 
         em.field("Help & Support", `[Commands](${web}/commands)\n[Support](https://gensokyobot.com/support)\n[Status](http://status.sixaiy.com)`, true);
         em.field(`Get GensokyoBot`, `[Add GensokyoBot](${web}/invite)\n[Add GensokyoBot EX](${web}/inv/ex)`, true);
+
 
         mods.map((m) => {
             let 
@@ -56,17 +59,23 @@ mod.command("help", {
                 });
             output += em.field(name, `\`\`\`\n${loaded.join(", ")}\`\`\``, false);
          });
-        em.thumbnail(msg.channel.guild.iconURL);
-        em.description(`Hay **${msg.author.username}**\nYou can show your prefix anytime by mentioning me.`);
+        //em.thumbnail(msg.member.guild.iconURL);
+        em.description(`Hay **${msg.member.user.username}**\nYou can show your prefix anytime by mentioning me.`);
         em.field(`Bot Rank`, `${rank.level} (${rank.friendly})`, true);
-        em.field(`You're Prefix`, `\`${msg.prefix}\``, true);
+        if(msg.prefix == undefined) em.field(`Interaction Prefix`, `\`/\``, true);
+        if(msg.prefix != undefined) em.field(`You're Prefix`, `\`${msg.prefix}\``, true);
         em.field(`Commands`, `**${usableCmds}** Usable / **${totalCmds}** Total`, true);
         em.color(conf.discord.color);
-        em.author(`Server: ${msg.channel.guild.name}`);
+        //em.author(`Server: ${msg.member.guild.name}`);
         em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
         em.timestamp();
 
-        msg.channel.createEmbed(em);
+        //app.bot.sendEmbed(t, msg, em);
+        if(t == "i") {
+            msg.createMessage({ embeds: [em] }).then(m => {
+                m.acknowledge();
+            });
+        }
     }
 });
 
@@ -74,39 +83,38 @@ mod.alias("ping", "stats");
 mod.alias("shards", "stats");
 mod.alias("status", "stats");
 mod.command("stats", {
-    feature: "Shows Ping, Status and much more information regarding the bot.",
+    interaction: true,
+    desc: "Shows Ping, Status and much more information regarding the bot.",
     rank: 0,
-    func: async function(app, msg, args, rank) {
-        let ping = Date.now();
-            msg.channel.createMessage("Loading Statistics").then(async (m) => {
-                m.delete();
-                let 
-                    clusters = "",
-                    em = app.bot.makeEmbed(),
-                    stats = await app.ipc.getStats(),
-                    loadavg = os.loadavg(),
-                    totalram = stats.totalRam,
-                    clustram = stats.clustersRam,
-                    shards = stats.shardCount,
-                    guilds = stats.guilds,
-                    uptime = process.uptime();
+    func: async function(t, app, msg, args, rank) {
+        let 
+            ping = Date.now(),
+            clusters = "",
+            em = app.bot.makeEmbed(),
+            stats = await app.ipc.getStats(),
+            loadavg = os.loadavg(),
+            totalram = stats.totalRam,
+            clustram = stats.clustersRam,
+            shards = stats.shardCount,
+            guilds = stats.guilds,
+            uptime = process.uptime();
                 
-                stats.clusters.map((d) => clusters++ );
+        stats.clusters.map((d) => clusters++ );
                 
-                em.author(`${app.bot.user.username} Stats`, app.bot.user.avatarURL);
-                em.field('Bot', `Ping: **${Date.now() - ping}ms\n**Uptime: **${app.bot.dhm(uptime)}**\nMemory: **${(totalram - clustram).toFixed(3)} MB / ${totalram.toFixed(3)} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
-                em.field("Stats", `Shards: **${shards.toLocaleString()}**\nGuilds: **${guilds.toLocaleString()}**`, false);
-                em.timestamp();
-                em.color(conf.discord.color);
+        em.author(`${app.bot.user.username} Stats`, app.bot.user.avatarURL);
+        em.field('Bot', `Ping: **${Date.now() - ping}ms\n**Uptime: **${app.bot.dhm(uptime)}**\nMemory: **${(totalram - clustram).toFixed(3)} MB / ${totalram.toFixed(3)} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
+        em.field("Stats", `Shards: **${shards.toLocaleString()}**\nGuilds: **${guilds.toLocaleString()}**`, false);
+        em.timestamp();
+        em.color(conf.discord.color);
                 
-                msg.channel.createEmbed(em);
-            });
+        app.bot.sendEmbed(t, msg, em);
     }
 });
 
 mod.alias("m", "bot");
 mod.command("bot", {
-    feature: "Owner stuff will only work for the owner!",
+    interaction: false,
+    desc: "Owner stuff will only work for the owner!",
     rank: 7,
     func: async function(app, msg, args, rank) {
             let cmd = args.split(' ');

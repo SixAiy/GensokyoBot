@@ -8,6 +8,14 @@
   },
   "author": "SixAiy",
   "license": "GNU-V3",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sixaiy/gensokyobot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sixaiy/gensokyobot/issues"
+  },
+  "homepage": "https://sixaiy.dev/",
   "dependencies": {
     "body-parser": "^1.19.0",
     "cluster": "^0.7.7",

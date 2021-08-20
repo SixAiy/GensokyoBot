@@ -44,6 +44,7 @@ ModuleManager.prototype.load = function(mod) {
     if (fs.existsSync(this.pathBFU + mod)) {
         //var file = self.pathBFU + mod;
         this.pluginslist[mod] = require(this.pathBFU + mod);
+		console.log(this.pluginslist);
 		return true;
 	} else {
 		return false;

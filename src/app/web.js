@@ -49,9 +49,8 @@ module.exports = class ServiceWorker extends BaseServiceWorker {
         this.web.use(bodyParser.urlencoded({ extended: true }));
 
         this.buildPage("/", "Home", "index");
-        this.buildPage("/cmds", "Commands", "cmds");
         this.buildPage('/music', "Now Playing", "music");
-        this.buildPage("/team", "Team", "team");
+        //this.buildPage("/team", "Team", "team");
         this.buildPage("/privacy", "Privacy Policy", "inc/legal/privacy");
         //this.buildPage("/terms", "Terms of Use", "inc/legal/terms");
         //this.buildPage("/dmca", "Copyright Infringement Policy (DMCA)", "inc/legal/dmca");
@@ -63,8 +62,40 @@ module.exports = class ServiceWorker extends BaseServiceWorker {
         this.redirectPage('/telegram', conf.web.links.telegram);
         this.redirectPage("/invite", conf.web.links.gensokyobot);
 
-        // API Functions
-        this.web.get("/api/cmds", async(req, res) => {
+        // Team Page - because staff love changing there profile pic :/
+        this.web.get('/team', async(req, res) => {
+            let
+                guild = await this.ipc.fetchGuild(conf.discord.guild),
+                team = [],
+                role = "",
+                roles = conf.discord.roles;
+
+            console.log(guild);
+            /*
+            guild.members.map(m => {
+                if(!m.roles.includes(roles.admin || roles.mod)) return;
+                if(m.roles.includes(roles.admin)) role = guild.roles.get(roles.admin);
+                if(m.roles.includes(roles.mod)) role = guild.roles.get(roles.mod);
+
+                let 
+                    roleColor = role.color,
+                    roleName = role.name,
+                    bt = {
+                        username: m.user.username,
+                        avatar: m.user.avatarURL,
+                        role: { name: roleName, color: roleColor }
+                    }
+
+                team.push(bt);
+            });
+            */
+
+            res.render(path.resolve(`${site}/team.ejs`, { title: "Team", team: team }))
+        });
+
+        // Commands Page
+        this.web.get("/cmds", async(req, res) => {
+
             let 
                 output = {},
                 mods = this.modman.getPlugins();
@@ -84,15 +115,17 @@ module.exports = class ServiceWorker extends BaseServiceWorker {
                 
                 output[name] = cmds.filter((e) => { return e != null });
             });
-            res.json(output);
+
+            res.render(path.resolve(`${site}/cmds.ejs`), {
+                title: "Commands",
+                output
+            })
         });
+
+        // API Functions
         this.web.get("/api/playing", async(req, res) => {
             let x = await fetch(conf.lists.gr.url).then(r => r.json());
             res.json(x);
-        });
-        this.web.get("/api/stats", async(req, res) => {
-            let stats = await this.ipc.getStats();
-            res.json(stats);
         });
 
         this.web.listen(conf.web.port, () => this.serviceReady());

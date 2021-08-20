@@ -33,9 +33,16 @@ class Bot extends BaseClusterWorker {
         require('../util/func')(this);
 
         this.bot.core = this;
+        this.bot.interactionCommands(this);
         this.bot.editStatus("online", { name: `/help or ${conf.discord.prefix}help`, type: 0 });
         this.bot.on("error", (e) => console.log(e.stack));
-        this.bot.on("rawWS", (d) => require('../util/rawWS')(this, d));
+        
+        //this.bot.on("rawWS", (d) => require('../util/rawWS')(this, d));
+
+        // Message and Interaction Commands Handler
+        this.bot.on("interactionCreate", (i) => this.bot.getCommand(i, this));
+        this.bot.on("messageCreate", (m) => this.bot.getCommand(m, this));
+        
     }
     async shutdown(done) {
         await this.bot.disconnect();

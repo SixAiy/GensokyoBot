@@ -18,28 +18,32 @@
 
 "use strict"
 
-const conf = require('../conf');
+let 
+    conf = require('../conf'),
+    fetch = require('node-fetch');
 
 module.exports = async(m) => {
 
-    // interactionCreate Handler
-    m.bot.makeInteration = () => {
-
-    };
-
-    // messageCreate Handler
+    // messageCreate and interactionCreate Handler
     m.bot.getCommand = (msg, app) => {
-        msg.prefix = conf.discord.prefix;
+        console.log(msg.member.user.username);
+        if(msg.member.user.bot || msg.data.name == undefined) return;
 
-        const prefixMention = new RegExp(`^<@!?${app.bot.user.id}>( |)$`);
-        if(msg.content.match(prefixMention)) return msg.channel.createMessage(`Your prefix is \`${msg.prefix}\``);
-        if(msg.content.indexOf(msg.prefix) !== 0) return;
-
-        let 
+        let
             level = app.bot.permlevel(app, msg),
-            friendly = app.bot.perms.find(l => l.level == level).name,
-            systemLevel = { friendly: friendly, level: level },
+            friendly = app.bot.perms.find((l) => l.level == level).name,
+            sysLvl = { friendly, level },
             res = undefined;
+
+        if(msg.token == undefined) {
+            msg.prefix = conf.discord.prefix;
+    
+            const prefixMention = new RegExp(`^<@!?${app.bot.user.id}>( |)$`);
+            if(msg.content.match(prefixMention)) return msg.channel.createMessage(`Your prefix is \`${msg.prefix}\``);
+            if(msg.content.indexOf(msg.prefix) !== 0) return;
+        } else {
+            msg.content = msg.data.name;
+        }
         
         for(let plugin in app.bot.core._plugins) {
             let r = app.bot.core._plugins[plugin].mod.getCommand(msg);
@@ -47,10 +51,21 @@ module.exports = async(m) => {
                 res = r;
                 if(level >= res.cmd.rank) {
                     let args = res.res.args || "";
-                    res.cmd.func(app, msg, args, systemLevel);
+                    if(msg.token == undefined) return res.cmd.func("m", app, msg, args, sysLvl);
+                    res.cmd.func("i", app, msg, args, sysLvl);
                 }
             }
         }
+    }
+
+    // Message Handler
+    m.bot.sendEmbed = (t, msg, args) => {
+        if(t == "i") return msg.createMessage({ embeds: [args] });
+        if(t == "m") return msg.channel.createMessage({ embeds: [args] });
+    }
+    m.bot.sendMessage = (t, msg, args) => {
+        if(t == "i") return msg.createMessage(args);
+        if(t == "m") return msg.channel.createMessage(args);
     }
 
     // Main Functions
@@ -59,8 +74,8 @@ module.exports = async(m) => {
         const permOrder = app.bot.perms.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
         while (permOrder.length) {
             const currentLevel = permOrder.shift();
-            if (msg.guild && currentLevel.guildOnly) continue;
-            if (currentLevel.check(app, msg)) {
+            if(msg.member.guild && currentLevel.guildOnly) continue;
+            if(currentLevel.check(app, msg)) {
                 permlvl = currentLevel.level;
                 break;
             }
@@ -111,13 +126,6 @@ module.exports = async(m) => {
         return segments.join(', ');
     }
 
-    // Slash Creator
-    m.bot.getAppInteration = (guild) => {
-        let app = m.bot.api.applications(bot.user.id);
-        if(guild) app.guilds(guild);
-        return app;
-    }
-
 
     // Post Stats to listing site
     m.bot.postStatsList = async(type, key, app, url) => {
@@ -142,19 +150,13 @@ module.exports = async(m) => {
         
     };
 
-    /*
     // Grabs Staff members
     m.bot.fetchStaff = async(userid, roleid) => {
         let u = await m.ipc.fetchMember(conf.guild_id, userid);
         return u.roles.includes(roleid);
     };
-    m.bot.fetchGuildOwner = async(guild) => {
-        let g = await m.ipc.fetchGuild(guild);
-        return g.ownerID;
-    }
-    */
 
-    // Permission System Storage
+    // Permission System Storage for messageCreate
     m.bot.perms = [
         { 
             level: 0, 
@@ -165,40 +167,77 @@ module.exports = async(m) => {
         { 
             level: 1, 
             name: "Guild Mod", 
-            check: (x, m) => false
+            check: (app, msg) => false
         },
         { 
             level: 2, 
             name: "Guild Admin", 
-            check: (x, m) => false
+            check: (app, msg) => false
         },
+        */
         { 
             level: 3, 
             name: "Guild Owner", 
-            check: (x, m) => false //m.bot.fetchGuildOwner(x.guild_id) 
+            check: (app, msg) => msg.member.guild.ownerID == msg.member.user.id
         },
         { 
             level: 4, 
             name: "Bot Mod", 
-            check: (x, m) => m.bot.fetchStaff(x.user.id, conf.role.mod)
+            check: (app, msg) => app.bot.fetchStaff(msg.member.user.id, conf.role.mod)
         },
         { 
             level: 5, 
             name: "Bot Admin", 
-            check: (x, m) => m.bot.fetchStaff(x.user.id, conf.role.admin) 
+            check: (app, msg) => app.bot.fetchStaff(msg.member.user.id, conf.role.admin)
         },
         { 
             level: 6, 
             name: "Bot Dev", 
-            check: (x, m) => m.bot.fetchStaff(x.user.id, conf.role.dev) 
+            check: (app, msg) => app.bot.fetchStaff(msg.member.user.id, conf.role.dev)
         },
-        */
         { 
             level: 7, 
             name: "Bot Owner", 
-            check: (app, msg) => conf.discord.owners.includes(msg.author.id)
+            check: (app, msg) => conf.discord.owners.includes(msg.member.user.id)
         }
     ];
 
+    // Global Sleep Function for (this/app)
+    m.objectSleep = (x) => {
+        let date = Date.now();
+        let curDate = null;
+        do { 
+            curDate = Date.now(); 
+        } while(curDate - date < x);
+    }
+
+    // interaction Commands Register
+    m.bot.interactionCommands = async(app) => {
+        const intercmds = await app.bot.getCommands(); // pulls the interaction commands to see if they are listed!
+        const mods = app.modman.getPlugins();
+
+        mods.map(async(module) => {
+            const data = app.bot.core._plugins[module].mod.getAllCommands();
+            data.map(async(c) => {
+                // Interaction Check so we dont re-register - better safe then sorry.
+                for(let intercmd of intercmds) {
+                    // Check if each command is registered if not registered it will register that command
+                    if(intercmd.name != c.name && intercmd.application_id != app.bot.user.id) {
+                        // if the interaction is false it wont register the command - still partly buggy
+                        if(!c.interaction) return;
+                        app.bot.createCommand({
+                            name: c.name,
+                            description: c.desc,
+                            options: [],
+                            type: 1
+                        });
+                        // sleep for 5 seconds so we dont slam discords api
+                        m.objectSleep(5000);
+                    }
+                    return;
+                }
+            });
+        });
+    }
 
 }

@@ -23,7 +23,6 @@ module.exports = {
         token: "",
 
         // Config
-        slash: false, // Enable Slash Commands Globally?
         prefix: "?", // Default Prefix
         owners: ["", ""],
         guild: "", // Home Guild
