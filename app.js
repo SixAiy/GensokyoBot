@@ -22,13 +22,16 @@ let
     { Webhook } = require('discord-webhook-node'),
     conf = require('./src/conf'),
     man = require('./src/util/man'),
-    bot = new Eris(conf.discord.token, conf.discord.erisOptions),
+    bot = new Eris(conf.token, { 
+        maxShards: conf.eris_shards, 
+        getAllUsers: conf.eris_users,
+        intents: conf.eris_intents
+    }),
     modman = new man.ModuleManager(`${process.cwd()}/src/modules/`),
-    app = { bot, func: {} };
+    app = { bot, func: {}, modman };
 
-app.func.modman = modman;
-app.func.modman.LoadPlugins();
-app.func._plugins = app.func.modman.pluginslist;
+app.modman.LoadPlugins();
+app._plugins = app.modman.pluginslist;
 
 require('./src/util/extendEris')(Eris);
 app.bot.connect();

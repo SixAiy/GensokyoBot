@@ -15,57 +15,45 @@
 # This program is distributed under the terms of the GNU GPL.
 ######################################################################
 */
-
 "use strict"
 
 module.exports = {
-    discord: {
-        token: "",
+    development:            true,
 
-        // Config
-        prefix: "?", // Default Prefix
-        owners: ["", ""],
-        roles: {
-            admin: "",
-            mod: ""
-        },
-        guild: "", // Home Guild
-        color: 0x421250, // Color
-        status: { 
-            name: `Music`, 
-            type: 0 
-        },
-        erisOptions: { 
-            shards: "auto",
-            getAllUsers: true, 
-            intents: [ 
-                "guilds", 
-                "guildMembers", 
-                "guildMessages", 
-                "guildInteractions" 
-            ] 
-        }
-    },
-    // URLs
-    lists: {
-        sa: { url: "https://api.sixaiy.com/v3/X712x2", key: "" },
-        sc: { url: "https://sentcord.com/api/bot/X712x2", key: "" },
-        gr: { url: "https://gensokyoradio.net/api/station/playing", key: "" },
-        cb: { url: "https://carbonitex.net/discord/data/botdata.php", key: "" },
-        top: { url: "https://top.gg/api/bots/X712x2/stats", key: "-" },
-        dbgg: { url: "https://discord.bots.gg/api/v1/bots/X712x2/stats", key: "" },
-        dbl: { url: "https://discordbotlist.com/api/v1/bots/X712x2/stats", key: "" },
-        dls: { url: "https://api.discordlist.space/v2/bots/X712x2", key: "" }
-    },
+    bot_token:              "",
+    api_token:              "",
 
-    // Web Settings
-    web: {
-        port: 4000,
-        links: { 
-            radio: "https://gensokyoradio.net/playing",
-            network: "http://status.sixaiy.com", 
-            discord: "https://discord.gg/C3vRDBU5kR", 
-            invite: "https://discord.com/oauth2/authorize?client_id=302857939910131712&scope=bot%20applications.commands&permissions=305261734",
-        }
-    }
+    legacy_prefix:          "-", // Bot runs with Slash Commands Now.
+    bot_admin:              "",
+    bot_mod:                "",
+    bot_owners:             [""], // Only place userIds in here.
+    guild_id:               "",
+    game:                   "",
+
+    webhook_error_log:      "",
+    webhook_guild_log:      "",
+
+    eris_shards:            "auto",
+    eris_all_users:         true,
+    eris_intents:           [ "guilds", "guildMembers", "guildMessages", "guildInteractions" ],
+
+    invite_perms:           "",
+    guild_invite:           "",
+
+    music_api:              "",
+    music_stream:           "",
+
+    embed_color:             0x421250,
+
+    web_domain:             "",
+    web_port:                4000,
+
+    // Bot Listing Places
+    enable_post:             false,
+    sentcord_token:         "",
+    carbonitex_token:       "",
+    topgg_token:            "",
+    discordbotsgg_token:    "",
+    discordbotlist_token:   "",
+    discordlistspace_token: ""
 };

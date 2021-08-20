@@ -38,7 +38,7 @@ mod.command("help", {
             desc = "",
             totalCmds = "",
             usableCmds = "",
-            mods = app.func.modman.getPlugins(),
+            mods = app.modman.getPlugins(),
             em = app.bot.makeEmbed();
 
         em.field("Help", `[Commands](${web.cmds})\n[Status](${web.network})`, true);
@@ -47,7 +47,7 @@ mod.command("help", {
 
         mods.map((m) => {
             let 
-                data = app.func._plugins[m].mod.getAllCommands(),
+                data = app._plugins[m].mod.getAllCommands(),
                 name = "",
                 loaded = data.map((md) => {
                     totalCmds++
@@ -78,7 +78,7 @@ mod.command("help", {
         if(msg.prefix == undefined) em.field(`Interaction Prefix`, `\`/\``, true);
         if(msg.prefix != undefined) em.field(`You're Prefix`, `\`${msg.prefix}\``, true);
         em.field(`Commands`, `**${usableCmds}** Usable / **${totalCmds}** Total`, true);
-        em.color(conf.discord.color);
+        em.color(conf.embed_color);
         em.author(`Server: ${msg.member.guild.name}`);
         em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
         em.timestamp();
@@ -106,10 +106,10 @@ mod.command("stats", {
                 
                 
         em.author(`${app.bot.user.username} Stats`, app.bot.user.avatarURL);
-        em.field('Bot', `Ping: **${Date.now() - ping + 1}ms\n**Uptime: **${app.bot.dhm(uptime)}**\nMemory: **${usedram} MB / ${totalram} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
+        em.field('Bot', `Ping: **${Date.now() - ping + 1}ms\n**Uptime: **${app.func.dhm(uptime)}**\nMemory: **${usedram} MB / ${totalram} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
         em.field("Stats", `Shards: **${app.bot.shards.size.toLocaleString()}**\nGuilds: **${app.bot.guilds.size.toLocaleString()}**`, false);
         em.timestamp();
-        em.color(conf.discord.color);
+        em.color(conf.embed_color);
                 
         app.func.sendEmbed(t, msg, em);
     }
@@ -126,7 +126,7 @@ mod.command("bot", {
                 let em = app.bot.makeEmbed();
                 em.author("Shards Commander");
                 em.thumbnail(app.bot.user.avatarURL)
-                em.color(0x421250);
+                em.color(conf.embed_color);
                 em.field(`relaod`, "Reloads a module", true);
                 em.field(`eval`, "Evals anything connected to the bot", true);
                 em.field(`leave`, "Leaves a guild", true);

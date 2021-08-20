@@ -18,6 +18,7 @@
 
 "use strict"
 
+const { enablePost } = require('../conf');
 let 
     conf = require('../conf'),
     fetch = require('node-fetch');
@@ -45,8 +46,8 @@ module.exports = async(m) => {
         }
         
         app.func.interactionCommands(app);
-        for(let plugin in app.func._plugins) {
-            let r = app.func._plugins[plugin].mod.getCommand(msg);
+        for(let plugin in app._plugins) {
+            let r = app._plugins[plugin].mod.getCommand(msg);
             if(r !== undefined) {
                 res = r;
                 if(level >= res.cmd.rank) {
@@ -59,18 +60,14 @@ module.exports = async(m) => {
     }
 
     // Message Handler
-    m.func.sendEmbed = (t, msg, args) => {
-        if(t == "i") return msg.createMessage({ embeds: [args] });
-        if(t == "m") return msg.channel.createMessage({ embeds: [args] });
+    m.func.sendEmbed = (t, msg, em) => {
+        if(t == "i") return msg.createEmbed(em);
+        if(t == "m") return msg.channel.createEmbed(em);
     }
     m.func.sendMessage = (t, msg, args) => {
         if(t == "i") return msg.createMessage(args);
         if(t == "m") return msg.channel.createMessage(args);
     }
-    m.func.sendChannelMessage = (t, app, id, args) => {
-        if(t == "em") return app.bot.createEmbed(id, args);
-        app.bot.createMessage(id, args);
-    };
 
     // Main Functions
     m.func.permlevel = (app, msg) => {
@@ -118,8 +115,17 @@ module.exports = async(m) => {
     m.func.activePlayers = () => {};
     m.func.countListeners = () => {};
 
-    // Post Stats to listing site
+    // Post Stats to listing site - will fix later
     m.func.postStatsList = async(type, key, app, url) => {
+        if(!conf.enable_post) return;
+        let urls = [
+            "https://sentcord.com/api/bot/X712x2",
+            "https://carbonitex.net/discord/data/botdata.php",
+            "https://top.gg/api/bots/X712x2/stats",
+            "https://discord.bots.gg/api/v1/bots/X712x2/stats",
+            "https://discordbotlist.com/api/v1/bots/X712x2/stats",
+            "https://api.discordlist.space/v2/bots/X712x2",
+        ];
 
         let d = await app.ipc.getStats();
         let buildD = {};
@@ -168,12 +174,12 @@ module.exports = async(m) => {
         { 
             level: 4, 
             name: "Bot Mod", 
-            check: (app, msg) => app.bot.guilds.get(conf.discord.guild).members.get(msg.member.user.id).roles.includes(conf.discord.roles.mod)
+            check: (app, msg) => app.bot.guilds.get(conf.discord.guild).members.get(msg.member.user.id).roles.includes(conf.bot_mod)
         },
         { 
             level: 5, 
             name: "Bot Admin", 
-            check: (app, msg) => app.bot.guilds.get(conf.discord.guild).members.get(msg.member.user.id).roles.includes(conf.discord.roles.admin)
+            check: (app, msg) => app.bot.guilds.get(conf.discord.guild).members.get(msg.member.user.id).roles.includes(conf.bot_admin)
         },
         { 
             level: 6, 
@@ -194,10 +200,10 @@ module.exports = async(m) => {
     // interaction Commands Register
     m.func.interactionCommands = async(app) => {
         const intercmds = await app.bot.getCommands(); // pulls the interaction commands to see if they are listed!
-        const mods = app.func.modman.getPlugins();
+        const mods = app.modman.getPlugins();
 
         mods.map(async(module) => {
-            const data = app.func._plugins[module].mod.getAllCommands();
+            const data = app._plugins[module].mod.getAllCommands();
             data.map(async(c) => {
                 // Interaction Check so we dont re-register - better safe then sorry.
                 for(let intercmd of intercmds) {

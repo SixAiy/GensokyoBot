@@ -35,7 +35,7 @@ mod.command("play", {
         let 
             perm = msg.member.guild.members.get(app.bot.user.id),
             vc = msg.member.voiceState.channelID,
-            gr = await fetch(conf.lists.gr.url).then(r => r.json());
+            gr = await fetch(conf.music_api).then(r => r.json());
 
         if(!perm.permissions.has("voiceSpeak")) return app.func.sendMessage(t, msg, "Missing Speak Permissions");
         if(!perm.permissions.has("voiceConnect")) return app.func.sendMessage(t, msg, "Missing Connect Permissions");
@@ -44,9 +44,9 @@ mod.command("play", {
         let vcn = msg.channel.guild.channels.get(vc).name;
 
         app.bot.joinVoiceChannel(vc).then(p => {
-            if(p.playing) return app.bot.sendMessage(t, msg, `Playing Music in ${vcn}`);
+            if(p.playing) return app.func.sendMessage(t, msg, `Playing Music in ${vcn}`);
 
-			p.play("https://stream.gensokyoradio.net/2", { inlineVolume: true });
+			p.play(conf.music_stream, { inlineVolume: true });
 			p.setVolume(50 / 100);
 
             app.func.sendMessage(t, msg, `Now playing **${gr.SONGINFO.ARTIST} - ${gr.SONGINFO.TITLE}** in **${vcn}**`);
@@ -68,7 +68,7 @@ mod.command("now", {
     rank: 0,
     func: async function(t, app, msg, args, rank) {
         let 
-            gr = await fetch(conf.lists.gr.url).then(r => r.json()),
+            gr = await fetch(conf.music_api).then(r => r.json()),
             current = {
                 arturl: "https://gensokyoradio.net/images/albums/500/",
                 songid: gr.SONGDATA.SONGID,
@@ -98,7 +98,7 @@ mod.command("now", {
         if(xdurS < 10) xdurS = "0" + xdurS;
 
         let em = app.bot.makeEmbed();
-        em.color(conf.discord.color);
+        em.color(conf.embed_color);
         em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/static/images/partners/gr.png", conf.web.links.radio)
         //em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/_gb/gr.png", conf.web.links.radio);
         em.title(`${current.artist} - ${current.title} (${current.circle})`);

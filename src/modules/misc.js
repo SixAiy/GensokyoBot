@@ -43,7 +43,7 @@ mod.command("stab", {
             img = imgs[rand],
             em = app.bot.makeEmbed();
 
-        em.color(conf.discord.color);
+        em.color(conf.embed_color);
         em.image(img);
 
         app.func.sendEmbed(t, msg, em);
@@ -73,7 +73,7 @@ mod.command("facedesk", {
             img = imgs[rand],
             em = app.bot.makeEmbed();
 
-        em.color(conf.discord.color);
+        em.color(conf.embed_color);
         em.image(img);
 
         app.func.sendEmbed(t, msg, em);
@@ -110,7 +110,7 @@ mod.command("hug", {
             img = imgs[rand],
             em = app.bot.makeEmbed();
 
-        em.color(conf.discord.color);
+        em.color(conf.embed_color);
         em.image(img);
 
         app.func.sendEmbed(t, msg, em);
@@ -173,7 +173,7 @@ mod.command("pat", {
             img = imgs[rand],
             em = app.bot.makeEmbed();
 
-        em.color(conf.discord.color);
+        em.color(conf.embed_color);
         em.image(img);
 
         app.func.sendEmbed(t, msg, em);
@@ -225,7 +225,7 @@ mod.command("roll", {
             img = imgs[rand],
             em = app.bot.makeEmbed();
 
-        em.color(conf.discord.color);
+        em.color(conf.embed_color);
         em.image(img);
 
         app.func.sendEmbed(t, msg, em);
@@ -238,7 +238,7 @@ mod.command("anime", {
     func: async function(t, app, msg, args, rank) {
         let em = app.bot.makeEmbed();
 
-        em.color(conf.discord.color);
+        em.color(conf.embed_color);
         em.image("http://i.imgur.com/93VahIh.png");
 
         app.func.sendEmbed(t, msg, em);
