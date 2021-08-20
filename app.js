@@ -18,17 +18,16 @@
 "use strict"
 
 let 
-    Eris = require('eris'),
-    { Webhook } = require('discord-webhook-node'),
-    conf = require('./src/conf'),
-    man = require('./src/util/man'),
-    bot = new Eris(conf.token, { 
-        maxShards: conf.eris_shards, 
-        getAllUsers: conf.eris_users,
-        intents: conf.eris_intents
-    }),
-    modman = new man.ModuleManager(`${process.cwd()}/src/modules/`),
-    app = { bot, func: {}, modman };
+    Eris            = require('eris'),
+    { Webhook }     = require('discord-webhook-node'),
+    { clear }       = require('console'),
+    conf            = require('./src/conf'),
+    man             = require('./src/util/man'),
+    bot             = new Eris(conf.bot_token, { maxShards: conf.eris_shards, getAllUsers: conf.eris_users, intents: conf.eris_intents }),
+    modman          = new man.ModuleManager(`${process.cwd()}/src/modules/`),
+    app             = { bot, func: {}, modman };
+
+clear();
 
 app.modman.LoadPlugins();
 app._plugins = app.modman.pluginslist;
@@ -43,8 +42,7 @@ app.bot.on("interactionCreate", (msg) => app.func.getCommand(app, msg));
 app.bot.on("messageCreate", (msg) => app.func.getCommand(app, msg));
 
 app.bot.on("error", (e) => {
-    let hook = conf.discord.hooks.error;
-    //sendHook(hook.id, hook.token, (`\`\`\`${e.stack}\`\`\``);
+    //sendHook(conf.webhook_error_log, (`\`\`\`${e.stack}\`\`\``);
     console.log(e.stack);
 }); 
 
@@ -57,11 +55,11 @@ app.bot.on("ready", () => {
 });
 app.bot.on("guildCreate", (g) => {
     let hook = conf.discord.hooks.join_leave;
-    sendHook(hook.id, hook.token, `<:join:877006355746136064> Guild: **${g.name}** (\`${g.id}\`)`);
+    sendHook(conf.webhook_guild_log, `<:join:877006355746136064> Guild: **${g.name}** (\`${g.id}\`)`);
 });
 app.bot.on("guildDelete", (g) => {
     let hook = conf.discord.hooks.join_leave;
-    sendHook(hook.id, hook.token, `<:leave:877006244794220585> Guild: **${g.name}** (\`${g.id}\`)`);
+    sendHook(conf.webhook_guild_log, `<:leave:877006244794220585> Guild: **${g.name}** (\`${g.id}\`)`);
 });
 
 // autoPost
@@ -69,7 +67,7 @@ app.bot.on("guildDelete", (g) => {
 
 
 // Functions for app.js
-function sendHook(id, token, msg) {
-    let hook = new Webhook(`https://discord.com/api/webhooks/${id}/${token}`);
+function sendHook(webhook, msg) {
+    let hook = new Webhook(webhook);
     hook.send(msg);
 }

@@ -31,20 +31,21 @@ mod.command("play", {
     desc: "Plays the music in the voice channel",
     rank: 0,
     func: async function(t, app, msg, args, rank) { 
-        console.log(msg.member.guild)   
         let 
             perm = msg.member.guild.members.get(app.bot.user.id),
-            vc = msg.member.voiceState.channelID,
-            gr = await fetch(conf.music_api).then(r => r.json());
+            vc = msg.member.voiceState.channelID;
 
         if(!perm.permissions.has("voiceSpeak")) return app.func.sendMessage(t, msg, "Missing Speak Permissions");
         if(!perm.permissions.has("voiceConnect")) return app.func.sendMessage(t, msg, "Missing Connect Permissions");
         if(!vc) return app.func.sendMessage(t, msg, "You need to be in a voice channel");
 
-        let vcn = msg.channel.guild.channels.get(vc).name;
+        let 
+            gr = await fetch(conf.music_api).then(r => r.json()),
+            vcn = msg.member.guild.channels.get(vc).name;
 
-        app.bot.joinVoiceChannel(vc).then(p => {
-            if(p.playing) return app.func.sendMessage(t, msg, `Playing Music in ${vcn}`);
+        if(t == "i") await msg.defer();
+        app.bot.joinVoiceChannel(vc).then(async(p) => {
+            if(p.playing) return app.func.sendMessage(t, msg, `Already Playing in **${vcn}**`);
 
 			p.play(conf.music_stream, { inlineVolume: true });
 			p.setVolume(50 / 100);
@@ -99,11 +100,11 @@ mod.command("now", {
 
         let em = app.bot.makeEmbed();
         em.color(conf.embed_color);
-        em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/static/images/partners/gr.png", conf.web.links.radio)
+        em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/static/images/partners/gr.png", conf.m)
         //em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/_gb/gr.png", conf.web.links.radio);
         em.title(`${current.artist} - ${current.title} (${current.circle})`);
-        //em.url(current.albumurl);
-        //if(current.albumart) em.thumbnail(current.arturl + current.albumart);
+        em.url(current.albumurl);
+        if(current.albumart) em.thumbnail(current.arturl + current.albumart);
         em.field("Title", current.title, true);
         em.field("Artist", current.artist, true);
         em.field("Album", current.album, true)
@@ -138,7 +139,7 @@ mod.command("stop", {
 
         let vcn = msg.member.guild.channels.get(vc).name;
 
-        app.func.sendMessage(t, msg, `Leaving ${vcn}`);
+        app.func.sendMessage(t, msg, `Leaving **${vcn}**`);
 
         app.bot.leaveVoiceChannel(vc);
     }

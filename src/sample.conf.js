@@ -38,7 +38,7 @@ module.exports = {
 
     eris_shards:            "auto",
     eris_all_users:         true,
-    eris_intents:           [ "guilds", "guildMembers", "guildMessages", "guildInteractions" ],
+    eris_intents:           [ "guilds", "guildMembers", "guildMessages", "guildInteractions", "guildVoiceStates" ],
 
     invite_perms:           "",
     guild_invite:           "",

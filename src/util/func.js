@@ -28,6 +28,7 @@ module.exports = async(m) => {
     // messageCreate and interactionCreate Handler
     m.func.getCommand = (app, msg) => {
         if(msg.member.user.bot) return;
+        msg.pingstamp = new Date() / 1000;
 
         let
             level = app.func.permlevel(app, msg),
@@ -36,7 +37,7 @@ module.exports = async(m) => {
             res = undefined;
 
         if(msg.token == undefined) {
-            msg.prefix = conf.discord.prefix;
+            msg.prefix = conf.legacy_prefix;
     
             const prefixMention = new RegExp(`^<@!?${app.bot.user.id}>( |)$`);
             if(msg.content.match(prefixMention)) return msg.channel.createMessage(`Your prefix is \`${msg.prefix}\``);
@@ -174,17 +175,17 @@ module.exports = async(m) => {
         { 
             level: 4, 
             name: "Bot Mod", 
-            check: (app, msg) => app.bot.guilds.get(conf.discord.guild).members.get(msg.member.user.id).roles.includes(conf.bot_mod)
+            check: (app, msg) => app.bot.guilds.get(conf.guild_id).members.get(msg.member.user.id).roles.includes(conf.bot_mod)
         },
         { 
             level: 5, 
             name: "Bot Admin", 
-            check: (app, msg) => app.bot.guilds.get(conf.discord.guild).members.get(msg.member.user.id).roles.includes(conf.bot_admin)
+            check: (app, msg) => app.bot.guilds.get(conf.guild_id).members.get(msg.member.user.id).roles.includes(conf.bot_admin)
         },
         { 
             level: 6, 
             name: "Bot Owner", 
-            check: (app, msg) => conf.discord.owners.includes(msg.member.user.id)
+            check: (app, msg) => conf.bot_owners.includes(msg.member.user.id)
         }
     ];
 
@@ -210,7 +211,7 @@ module.exports = async(m) => {
                     // Check if each command is registered if not registered it will register that command
                     if(intercmd.name != c.name && intercmd.application_id != app.bot.user.id) {
                         // if the interaction is false it wont register the command - still partly buggy
-                        if(!c.interaction) return;
+                        if(!c.interaction || c.name == "bot") return;
                         app.bot.createCommand({
                             name: c.name,
                             description: c.desc,

@@ -32,7 +32,7 @@ mod.command("help", {
     rank: 0,
     func: async function(t, app, msg, args, rank) {
         let 
-            web = conf.web.links,
+            web = "https://gensokyobot.com",
             output = "",
             cmds = "",
             desc = "",
@@ -41,8 +41,8 @@ mod.command("help", {
             mods = app.modman.getPlugins(),
             em = app.bot.makeEmbed();
 
-        em.field("Help", `[Commands](${web.cmds})\n[Status](${web.network})`, true);
-        em.field(`Support`, `[Invite](${web.invite})\n[Support](${web.discord})`, true);
+        em.field("Help", `[Commands](${web}/cmds)\n[Status](https://status.sixaiy.com)`, true);
+        em.field(`Support`, `[Invite](https://discord.com/oauth2/authorize?client_id=${app.bot.user.id}&scope=bot%20applications.commands&permissions=${conf.invite_perms})\n[Support](${conf.guild_invite})`, true);
         em.blankfield();
 
         mods.map((m) => {
@@ -96,7 +96,6 @@ mod.command("stats", {
     rank: 6,
     func: async function(t, app, msg, args, rank) {
         let 
-            ping = Date.now(),
             em = app.bot.makeEmbed(),
             loadavg = os.loadavg(),
             totalram = (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
@@ -106,10 +105,11 @@ mod.command("stats", {
                 
                 
         em.author(`${app.bot.user.username} Stats`, app.bot.user.avatarURL);
-        em.field('Bot', `Ping: **${Date.now() - ping + 1}ms\n**Uptime: **${app.func.dhm(uptime)}**\nMemory: **${usedram} MB / ${totalram} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
-        em.field("Stats", `Shards: **${app.bot.shards.size.toLocaleString()}**\nGuilds: **${app.bot.guilds.size.toLocaleString()}**`, false);
+        em.field('Bot', `Uptime: **${app.func.dhm(uptime)}**\nMemory: **${usedram} MB / ${totalram} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
+        em.field("Stats", `On Shard: **${msg.member.guild.shard.id}**\nTotal Shards: **${app.bot.shards.size.toLocaleString()}**\nTotal Guilds: **${app.bot.guilds.size.toLocaleString()}**`, false);
         em.timestamp();
         em.color(conf.embed_color);
+        em.footer(`Project ${app.bot.user.username}`);
                 
         app.func.sendEmbed(t, msg, em);
     }
@@ -149,7 +149,7 @@ mod.command("bot", {
                 app.bot.leaveGuild(cmd[1]);
             }
             if(cmd[0] == "reload") {
-                let state = app.func.modman.reload(cmd[1]);
+                let state = app.modman.reload(cmd[1]);
                 if(state) {
                     app.func.sendMessage(t, msg, `${cmd[1]} Rloaded ^^`);
                 } else {
@@ -181,6 +181,10 @@ mod.command("bot", {
                     em.field("Output", generateCodeblock(e));
                     app.func.sendEmbed(t, msg, em);
                 }
+            }
+            if(cmd[0] == "testing12345") {
+                let ping = new Date() - msg.timestamp;
+                msg.channel.createMessage(`ping is ${ping}`);
             }
     }
 });
