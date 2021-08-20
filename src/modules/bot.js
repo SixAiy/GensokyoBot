@@ -20,7 +20,6 @@
 
 let 
     mod = require('../util/mod').Module("bot"),
-    //mod = require('../util/mod').module("bot"),
     conf = require('../conf'),
     util = require('util'),
     os = require("os");
@@ -29,24 +28,26 @@ mod.alias("commands", "help");
 mod.alias("invite", "help");
 mod.command("help", {
     interaction: true,
-    desc: "Shows a list of all commands and information",
+    desc: "Shows a list of all commands",
     rank: 0,
     func: async function(t, app, msg, args, rank) {
         let 
-            web = "https://gensokyobot.com",
+            web = conf.web.links,
             output = "",
+            cmds = "",
+            desc = "",
             totalCmds = "",
             usableCmds = "",
-            mods = app.modman.getPlugins(),
+            mods = app.func.modman.getPlugins(),
             em = app.bot.makeEmbed();
 
-        em.field("Help & Support", `[Commands](${web}/commands)\n[Support](https://gensokyobot.com/support)\n[Status](http://status.sixaiy.com)`, true);
-        em.field(`Get GensokyoBot`, `[Add GensokyoBot](${web}/invite)\n[Add GensokyoBot EX](${web}/inv/ex)`, true);
-
+        em.field("Help", `[Commands](${web.cmds})\n[Status](${web.network})`, true);
+        em.field(`Support`, `[Invite](${web.invite})\n[Support](${web.discord})`, true);
+        em.blankfield();
 
         mods.map((m) => {
             let 
-                data = app.bot.core._plugins[m].mod.getAllCommands(),
+                data = app.func._plugins[m].mod.getAllCommands(),
                 name = "",
                 loaded = data.map((md) => {
                     totalCmds++
@@ -54,28 +55,35 @@ mod.command("help", {
                         let fix = m.charAt(0).toUpperCase() + m.slice(1);
                         name = fix.replace(/\.js$/i, "");
                         usableCmds++
-                        return (`${md.name}`);
+                        return {name: `▫️ **${md.name}**`, desc: `-${md.desc}`};
                     }
                 });
-            output += em.field(name, `\`\`\`\n${loaded.join(", ")}\`\`\``, false);
-         });
-        //em.thumbnail(msg.member.guild.iconURL);
-        em.description(`Hay **${msg.member.user.username}**\nYou can show your prefix anytime by mentioning me.`);
+            //console.log(loaded);
+            for(let cmd of loaded) {
+                if(cmd.name != undefined) {
+                    cmds += `${cmd.name}\n`;
+                    desc += `${cmd.desc}\n`;
+                }
+            }
+            //console.log(cmds, desc);
+            //output += em.field(name, `\n${loaded.join("\n")}`, false);
+        });
+        //return app.func.sendMessage(t, msg, cmds);
+        em.field("Commands", cmds, true);
+        em.field("Description", desc, true);
+        em.blankfield();
+        em.thumbnail(msg.member.guild.iconURL);
+        em.description(`Hay **${msg.member.user.username}**`);
         em.field(`Bot Rank`, `${rank.level} (${rank.friendly})`, true);
         if(msg.prefix == undefined) em.field(`Interaction Prefix`, `\`/\``, true);
         if(msg.prefix != undefined) em.field(`You're Prefix`, `\`${msg.prefix}\``, true);
         em.field(`Commands`, `**${usableCmds}** Usable / **${totalCmds}** Total`, true);
         em.color(conf.discord.color);
-        //em.author(`Server: ${msg.member.guild.name}`);
+        em.author(`Server: ${msg.member.guild.name}`);
         em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
         em.timestamp();
 
-        //app.bot.sendEmbed(t, msg, em);
-        if(t == "i") {
-            msg.createMessage({ embeds: [em] }).then(m => {
-                m.acknowledge();
-            });
-        }
+        app.func.sendEmbed(t, msg, em);
     }
 });
 
@@ -84,30 +92,26 @@ mod.alias("shards", "stats");
 mod.alias("status", "stats");
 mod.command("stats", {
     interaction: true,
-    desc: "Shows Ping, Status and much more information regarding the bot.",
-    rank: 0,
+    desc: "Shows Stastic Info.",
+    rank: 6,
     func: async function(t, app, msg, args, rank) {
         let 
             ping = Date.now(),
-            clusters = "",
             em = app.bot.makeEmbed(),
-            stats = await app.ipc.getStats(),
             loadavg = os.loadavg(),
-            totalram = stats.totalRam,
-            clustram = stats.clustersRam,
-            shards = stats.shardCount,
-            guilds = stats.guilds,
+            totalram = (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
+            usedram = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
+            freeram = ((process.memoryUsage()['rss'] - process.memoryUsage()['heapUsed']) / 1024 / 1024).toFixed(2),
             uptime = process.uptime();
                 
-        stats.clusters.map((d) => clusters++ );
                 
         em.author(`${app.bot.user.username} Stats`, app.bot.user.avatarURL);
-        em.field('Bot', `Ping: **${Date.now() - ping}ms\n**Uptime: **${app.bot.dhm(uptime)}**\nMemory: **${(totalram - clustram).toFixed(3)} MB / ${totalram.toFixed(3)} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
-        em.field("Stats", `Shards: **${shards.toLocaleString()}**\nGuilds: **${guilds.toLocaleString()}**`, false);
+        em.field('Bot', `Ping: **${Date.now() - ping + 1}ms\n**Uptime: **${app.bot.dhm(uptime)}**\nMemory: **${usedram} MB / ${totalram} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
+        em.field("Stats", `Shards: **${app.bot.shards.size.toLocaleString()}**\nGuilds: **${app.bot.guilds.size.toLocaleString()}**`, false);
         em.timestamp();
         em.color(conf.discord.color);
                 
-        app.bot.sendEmbed(t, msg, em);
+        app.func.sendEmbed(t, msg, em);
     }
 });
 
@@ -115,102 +119,67 @@ mod.alias("m", "bot");
 mod.command("bot", {
     interaction: false,
     desc: "Owner stuff will only work for the owner!",
-    rank: 7,
-    func: async function(app, msg, args, rank) {
+    rank: 6,
+    func: async function(t, app, msg, args, rank) {
             let cmd = args.split(' ');
             if(!cmd[0]) {
                 let em = app.bot.makeEmbed();
-                em.author("Fleet Commander");
+                em.author("Shards Commander");
                 em.thumbnail(app.bot.user.avatarURL)
                 em.color(0x421250);
-                em.field(`service`, "Restarts Service (ex: bot service <web/telegram>)", true);
-                em.field(`clusters`, "Cluster Commander", true);
-                em.field(`shards`, `Shard Commander`, true);
-                em.field(`reshard`, "Reshards all the Discord Shards", true);
                 em.field(`relaod`, "Reloads a module", true);
                 em.field(`eval`, "Evals anything connected to the bot", true);
+                em.field(`leave`, "Leaves a guild", true);
+                em.field(`reboot`, "restarts the bot", true);
                 em.timestamp();
                 em.footer(`Project ${app.bot.user.username}`);
 
-                msg.channel.createEmbed(em);
+                app.func.sendEmbed(t, msg, em);
             }
-            if(cmd[0] == "service") {
-                if(!cmd[1]) return msg.channel.createMessage("You need to tell me what service to restart!");
-                msg.channel.createMessage(`Ok i have restarted ${cmd[1]}`);
-                app.ipc.restartService(cmd[1]);
+            if(cmd[0] == "reboot") {
+                app.func.sendMessage(t, msg, "Rebooting please wait");
+                app.Sleep(5000);
+                app.bot.disconnect();
             }
-            if(cmd[0] == "clusters") {
-                if(!cmd[1]) {
-                    let em = app.bot.makeEmbed();
-                    em.author("Cluster Commander");
-                    em.thumbnail(app.bot.user.avatarURL)
-                    em.color(0x421250);
-                    em.field(`find`, "Find a guild on a cluster", true);
-                    em.field(`restart`, "Restart Cluster <number>", true);
-                    em.field(`restart all`, "Restart all clusters", true);
-                    em.timestamp();
-                    em.footer(`Project ${app.bot.user.username}`);
-
-                    msg.channel.createEmbed(em);
-                }
-                if(cmd[1] == "find") return msg.channel.createMessage("This command needs working on.");
-                if(cmd[1] == "restart") {
-                    if(cmd[2] == "all") {
-                        msg.channel.createMessage("I'm restarting all the Clusters for Discord");
-                        app.ipc.restartAllClusters();
-                    }
-                    if(!cmd[2] || isNaN(cmd[2])) return msg.channel.createMessage("I need to know what cluster to restart!");
-                    msg.channel.createMessage(`Restarting Cluster: ${cmd[2]}`);
-                    app.ipc.restartCluster(cmd[2]);
-                }
-            }
-            if(cmd[0] == "reshard") {
-                msg.channel.createMessage("Restarting All Shards");
-                app.ipc.reshard();
+            if(cmd[0] == "leave") {
+                if(!cmd[1]) return app.func.sendMessage(t, msg, "I need a Guild ID (ex: bot leave 123456789)");
+                let guild = app.bot.guilds.get(cmd[1]);
+                app.func.sendMessage(t, msg, `Leaving ${guild.name} (${guild.id})`);
+                m.Sleep(5000);
+                app.bot.leaveGuild(cmd[1]);
             }
             if(cmd[0] == "reload") {
-                if(!cmd[1]) return msg.channel.createMessage("The reload function has been disabled. This will be placed into IPC for Global Reload.");
-                let state = app.modman.reload(cmd[1]);
-                //let json = JSON.stringify({ plugin: cmd[1], chID: msg.channel.id })
-                //main.ipc.admrialBroadcast("reloadPlugin", json);
+                let state = app.func.modman.reload(cmd[1]);
                 if(state) {
-                    msg.channel.createMessage(`${cmd[1]} Rloaded ^^`);
+                    app.func.sendMessage(t, msg, `${cmd[1]} Rloaded ^^`);
                 } else {
                     let em = bot.makeEmbed();
                     em.description("0.0 WHAT ARE YOU PLAYING AT REEEEE D:<");
-                    em.image('https://media1.tenor.com/images/a715f8f49a7ca5cfa04bb4eb2899552e/tenor.gif');;
-                    msg.channel.createEmbed(em);
+                    em.image('https://media1.tenor.com/images/a715f8f49a7ca5cfa04bb4eb2899552e/tenor.gif');
+                    app.func.sendEmbed(t, msg, em);
                 }
             }
             if(cmd[0] == "eval") {
-
                 let arg = cmd.slice(1).join(" ");
-
                 try {
-
                     let 
                         back = eval(arg),
                         string = util.inspect(back, { depth: 1 }),
                         em = app.bot.makeEmbed();
-
                     em.title("Eval Results");
                     em.color(0x8BC34A);
                     em.field("Input", generateCodeblock(arg));
                     em.field("Output", generateCodeblock(string));
                     em.timestamp();
                     em.footer(`Project ${app.bot.user.username}`);
-                    
-                    msg.channel.createEmbed(em);
-
+                    app.func.sendEmbed(t, msg, em);
                 } catch(e) {
-
                     let em = app.bot.makeEmbed();
                     em.title("Eval Results");
                     em.color(0xF44336);
                     em.field("Input", generateCodeblock(arg));
                     em.field("Output", generateCodeblock(e));
-                    
-                    msg.channel.createEmbed(em);
+                    app.func.sendEmbed(t, msg, em);
                 }
             }
     }

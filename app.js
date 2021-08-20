@@ -1,43 +1,51 @@
-/*
-#####################################################################
-# File: app.js
-# Title: A Radio Music Bot
-# Author: SixAiy <me@sixaiy.com>
-# Version: 0.5a
-# Description:
-#  A GensokyoRadio.net Discord bot for playing the radio on discord.
-#####################################################################
-
-#####################################################################
-# License
-#####################################################################
-# Copyright 2021 Contributing Authors
-# This program is distributed under the terms of the GNU GPL.
-######################################################################
-*/
-
 "use strict"
 
-let     
-    { isMaster } = require('cluster'),
-    { Fleet } = require('./src/shardManager'),
-    path = require("path"),
-    { clear } = require("console"),
-    conf = require('./src/conf');
+let 
+    Eris = require('eris'),
+    { Webhook } = require('discord-webhook-node'),
+    conf = require('./src/conf'),
+    man = require('./src/util/man'),
+    bot = new Eris(conf.discord.token, conf.discord.erisOptions),
+    modman = new man.ModuleManager(`${process.cwd()}/src/modules/`),
+    app = { bot, func: {} };
 
-const fleetSettings = {
-    name: "GensokyoBot", 
-    path: path.join(__dirname, "./src/app/discord.js"), 
-    token: conf.discord.token, 
-    fetchTimeout: 300000,
-    services: [{ name: "Web", path: path.join(__dirname, "./src/app/web.js") }]
-};
-const Master = new Fleet(fleetSettings);
+app.func.modman = modman;
+app.func.modman.LoadPlugins();
+app.func._plugins = app.func.modman.pluginslist;
 
-if(isMaster) {
-    clear();
-    Master.on("log", (m) => console.log(m));
-    Master.on("debug", (m) => console.log(m));
-    Master.on("warn", (m) => console.log(m));
-    Master.on("error", (m) => console.log(m));
-}
+require('./src/util/extendEris')(Eris);
+app.bot.connect();
+
+require('./src/util/func')(app); // Functions
+
+// Command Handling
+app.bot.on("interactionCreate", (i) => app.func.getCommand(i, app));
+app.bot.on("messageCreate", (m) => app.func.getCommand(m, app));
+
+app.bot.on("error", (e) => {
+    let hook = conf.discord.hooks.error;
+    let webhook = new Webhook(`https://discord.com/api/webhooks/${hook.id}/${hook.token}`);
+    webhook.send(`\`\`\`${e.stack}\`\`\``);
+    console.log(e.stack);
+}); 
+
+// Discord Events
+app.bot.on("ready", () => {
+    app.func.interactionCommands(app);
+    app.bot.editStatus("online", conf.discord.status);
+    console.log("Discord", "Ready!");
+    require('./src/web')(app); // Website
+});
+app.bot.on("guildCreate", (g) => {
+    let hook = conf.discord.hooks.join_leave;
+    let webhook = new Webhook(`https://discord.com/api/webhooks/${hook.id}/${hook.token}`);
+    webhook.send(`<:join:877006355746136064> Guild: **${g.name}** (\`${g.id}\`)`);
+});
+app.bot.on("guildDelete", (g) => {
+    let hook = conf.discord.hooks.join_leave;
+    let webhook = new Webhook(`https://discord.com/api/webhooks/${hook.id}/${hook.token}`);
+    webhook.send(`<:leave:877006244794220585> Guild: **${g.name}** (\`${g.id}\`)`);
+});
+
+// autoPost
+// Coming soon :P

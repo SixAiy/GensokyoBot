@@ -46,7 +46,7 @@ mod.command("stab", {
         em.color(conf.discord.color);
         em.image(img);
 
-        app.bot.sendEmbed(t, msg, em);
+        app.func.sendEmbed(t, msg, em);
     }
 });
 mod.command("facedesk", {
@@ -76,7 +76,7 @@ mod.command("facedesk", {
         em.color(conf.discord.color);
         em.image(img);
 
-        app.bot.sendEmbed(t, msg, em);
+        app.func.sendEmbed(t, msg, em);
     }
 });
 mod.command("hug", {
@@ -113,7 +113,7 @@ mod.command("hug", {
         em.color(conf.discord.color);
         em.image(img);
 
-        app.bot.sendEmbed(t, msg, em);
+        app.func.sendEmbed(t, msg, em);
     }
 })
 mod.command("pat", {
@@ -176,7 +176,7 @@ mod.command("pat", {
         em.color(conf.discord.color);
         em.image(img);
 
-        app.bot.sendEmbed(t, msg, em);
+        app.func.sendEmbed(t, msg, em);
     }
 });
 mod.command("roll", {
@@ -228,7 +228,7 @@ mod.command("roll", {
         em.color(conf.discord.color);
         em.image(img);
 
-        app.bot.sendEmbed(t, msg, em);
+        app.func.sendEmbed(t, msg, em);
     }
 });
 mod.command("anime", {
@@ -241,7 +241,7 @@ mod.command("anime", {
         em.color(conf.discord.color);
         em.image("http://i.imgur.com/93VahIh.png");
 
-        app.bot.sendEmbed(t, msg, em);
+        app.func.sendEmbed(t, msg, em);
     }
 });
 

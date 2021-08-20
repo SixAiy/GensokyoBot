@@ -25,13 +25,12 @@ let
 module.exports = async(m) => {
 
     // messageCreate and interactionCreate Handler
-    m.bot.getCommand = (msg, app) => {
-        console.log(msg.member.user.username);
-        if(msg.member.user.bot || msg.data.name == undefined) return;
+    m.func.getCommand = (msg, app) => {
+        if(msg.member.user.bot) return;
 
         let
-            level = app.bot.permlevel(app, msg),
-            friendly = app.bot.perms.find((l) => l.level == level).name,
+            level = app.func.permlevel(app, msg),
+            friendly = app.func.perms.find((l) => l.level == level).name,
             sysLvl = { friendly, level },
             res = undefined;
 
@@ -45,8 +44,9 @@ module.exports = async(m) => {
             msg.content = msg.data.name;
         }
         
-        for(let plugin in app.bot.core._plugins) {
-            let r = app.bot.core._plugins[plugin].mod.getCommand(msg);
+        app.func.interactionCommands(app);
+        for(let plugin in app.func._plugins) {
+            let r = app.func._plugins[plugin].mod.getCommand(msg);
             if(r !== undefined) {
                 res = r;
                 if(level >= res.cmd.rank) {
@@ -59,19 +59,23 @@ module.exports = async(m) => {
     }
 
     // Message Handler
-    m.bot.sendEmbed = (t, msg, args) => {
+    m.func.sendEmbed = (t, msg, args) => {
         if(t == "i") return msg.createMessage({ embeds: [args] });
         if(t == "m") return msg.channel.createMessage({ embeds: [args] });
     }
-    m.bot.sendMessage = (t, msg, args) => {
+    m.func.sendMessage = (t, msg, args) => {
         if(t == "i") return msg.createMessage(args);
         if(t == "m") return msg.channel.createMessage(args);
     }
+    m.func.sendChannelMessage = (t, app, id, args) => {
+        if(t == "em") return app.bot.createEmbed(id, args);
+        app.bot.createMessage(id, args);
+    };
 
     // Main Functions
-    m.bot.permlevel = (app, msg) => {
+    m.func.permlevel = (app, msg) => {
         let permlvl = 0;
-        const permOrder = app.bot.perms.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
+        const permOrder = app.func.perms.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
         while (permOrder.length) {
             const currentLevel = permOrder.shift();
             if(msg.member.guild && currentLevel.guildOnly) continue;
@@ -91,23 +95,7 @@ module.exports = async(m) => {
             .replace(m.bot.token, "mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0");
         return txt;
     };
-    m.bot.countMusic = async(chan) => {
-        let 
-            vclisteners = 0,
-            vcusers = [],
-            ch = await m.ipc.fetchChannel(chan);
-        if(ch.type == 2 && ch.voiceMembers.has(m.bot.user.id)) {
-            vclisteners += ch.voiceMembers.map(x => x).length - 1;
-            ch.voiceMembers.map(async(x) => {
-                let 
-                    u = await m.ipc.fetchMember(x.guild, x.user.id),
-                    data = { username: u.user.username, id: u.user.id };
-                vcusers.push(data);
-            });
-        }
-        return { vclisteners, vcusers };
-    };
-    m.bot.dhm = (time) => {
+    m.func.dhm = (time) => {
         let 
             date = new Date(time * 1000),
             months = date.getUTCMonth(),
@@ -126,9 +114,12 @@ module.exports = async(m) => {
         return segments.join(', ');
     }
 
+    // Statstics Functions
+    m.func.activePlayers = () => {};
+    m.func.countListeners = () => {};
 
     // Post Stats to listing site
-    m.bot.postStatsList = async(type, key, app, url) => {
+    m.func.postStatsList = async(type, key, app, url) => {
 
         let d = await app.ipc.getStats();
         let buildD = {};
@@ -150,14 +141,8 @@ module.exports = async(m) => {
         
     };
 
-    // Grabs Staff members
-    m.bot.fetchStaff = async(userid, roleid) => {
-        let u = await m.ipc.fetchMember(conf.guild_id, userid);
-        return u.roles.includes(roleid);
-    };
-
     // Permission System Storage for messageCreate
-    m.bot.perms = [
+    m.func.perms = [
         { 
             level: 0, 
             name: "User", 
@@ -183,27 +168,22 @@ module.exports = async(m) => {
         { 
             level: 4, 
             name: "Bot Mod", 
-            check: (app, msg) => app.bot.fetchStaff(msg.member.user.id, conf.role.mod)
+            check: (app, msg) => app.bot.guilds.get(conf.discord.guild).members.get(msg.member.user.id).roles.includes(conf.discord.roles.mod)
         },
         { 
             level: 5, 
             name: "Bot Admin", 
-            check: (app, msg) => app.bot.fetchStaff(msg.member.user.id, conf.role.admin)
+            check: (app, msg) => app.bot.guilds.get(conf.discord.guild).members.get(msg.member.user.id).roles.includes(conf.discord.roles.admin)
         },
         { 
             level: 6, 
-            name: "Bot Dev", 
-            check: (app, msg) => app.bot.fetchStaff(msg.member.user.id, conf.role.dev)
-        },
-        { 
-            level: 7, 
             name: "Bot Owner", 
             check: (app, msg) => conf.discord.owners.includes(msg.member.user.id)
         }
     ];
 
     // Global Sleep Function for (this/app)
-    m.objectSleep = (x) => {
+    m.func.Sleep = (x) => {
         let date = Date.now();
         let curDate = null;
         do { 
@@ -212,12 +192,12 @@ module.exports = async(m) => {
     }
 
     // interaction Commands Register
-    m.bot.interactionCommands = async(app) => {
+    m.func.interactionCommands = async(app) => {
         const intercmds = await app.bot.getCommands(); // pulls the interaction commands to see if they are listed!
-        const mods = app.modman.getPlugins();
+        const mods = app.func.modman.getPlugins();
 
         mods.map(async(module) => {
-            const data = app.bot.core._plugins[module].mod.getAllCommands();
+            const data = app.func._plugins[module].mod.getAllCommands();
             data.map(async(c) => {
                 // Interaction Check so we dont re-register - better safe then sorry.
                 for(let intercmd of intercmds) {
@@ -232,7 +212,7 @@ module.exports = async(m) => {
                             type: 1
                         });
                         // sleep for 5 seconds so we dont slam discords api
-                        m.objectSleep(5000);
+                        m.Sleep(5000);
                     }
                     return;
                 }

@@ -25,8 +25,26 @@ module.exports = {
         // Config
         prefix: "?", // Default Prefix
         owners: ["", ""],
+        roles: {
+            admin: "",
+            mod: ""
+        },
         guild: "", // Home Guild
-        color: 0x421250 // Color
+        color: 0x421250, // Color
+        status: { 
+            name: `Music`, 
+            type: 0 
+        },
+        erisOptions: { 
+            shards: "auto",
+            getAllUsers: true, 
+            intents: [ 
+                "guilds", 
+                "guildMembers", 
+                "guildMessages", 
+                "guildInteractions" 
+            ] 
+        }
     },
     // URLs
     lists: {
@@ -44,12 +62,10 @@ module.exports = {
     web: {
         port: 4000,
         links: { 
-            bladenode: "https://bladenode.com",
             radio: "https://gensokyoradio.net/playing",
             network: "http://status.sixaiy.com", 
             discord: "https://discord.gg/C3vRDBU5kR", 
-            telegram: "https://t.me/joinchat/rfWlbVpfv_02OWFl",
-            gensokyobot: "https://discord.com/oauth2/authorize?client_id=302857939910131712&scope=bot%20applications.commands&permissions=305261734",
+            invite: "https://discord.com/oauth2/authorize?client_id=302857939910131712&scope=bot%20applications.commands&permissions=305261734",
         }
     }
 };

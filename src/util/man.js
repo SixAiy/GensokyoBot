@@ -19,7 +19,6 @@ var resolve = require('resolve');
 var _ = require("underscore");
 
 function ModuleManager(path) {
-	//console.log(path);
 	this.pluginslist = {};
 	this.pathBFU = path
 
@@ -27,24 +26,18 @@ function ModuleManager(path) {
 ModuleManager.prototype.LoadPlugins = function() {
 	var self = this;
 	var pluginsDir = fs.readdirSync(self.pathBFU);
-	//console.log(self.pathBFU);
     pluginsDir.forEach(function (file) {
-		//console.log(file);
         self.pluginslist[file] = require(self.pathBFU + file);
-		//self.isLoaded(file);
 	});
 };
 ModuleManager.prototype.pl = function() {
 	return this.pluginslist;
 };
 ModuleManager.prototype.load = function(mod) {
-	//console.log("LOAD " + mod)
 	var mod = mod.replace(/\.js$/i, "");
 	var mod = mod + ".js";
     if (fs.existsSync(this.pathBFU + mod)) {
-        //var file = self.pathBFU + mod;
         this.pluginslist[mod] = require(this.pathBFU + mod);
-		console.log(this.pluginslist);
 		return true;
 	} else {
 		return false;

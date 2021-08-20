@@ -28,7 +28,7 @@ mod.alias("j", "play");
 mod.alias("join", "play");
 mod.command("play", {
     interaction: true,
-    desc: "Plays the music in the voice channel your in",
+    desc: "Plays the music in the voice channel",
     rank: 0,
     func: async function(t, app, msg, args, rank) { 
         console.log(msg.member.guild)   
@@ -37,9 +37,9 @@ mod.command("play", {
             vc = msg.member.voiceState.channelID,
             gr = await fetch(conf.lists.gr.url).then(r => r.json());
 
-        if(!perm.permissions.has("voiceSpeak")) return app.bot.sendMessage(t, msg, "Missing Speak Permissions");
-        if(!perm.permissions.has("voiceConnect")) return app.bot.sendMessage(t, msg, "Missing Connect Permissions");
-        if(!vc) return app.bot.sendMessage(t, msg, "You need to be in a voice channel");
+        if(!perm.permissions.has("voiceSpeak")) return app.func.sendMessage(t, msg, "Missing Speak Permissions");
+        if(!perm.permissions.has("voiceConnect")) return app.func.sendMessage(t, msg, "Missing Connect Permissions");
+        if(!vc) return app.func.sendMessage(t, msg, "You need to be in a voice channel");
 
         let vcn = msg.channel.guild.channels.get(vc).name;
 
@@ -49,7 +49,7 @@ mod.command("play", {
 			p.play("https://stream.gensokyoradio.net/2", { inlineVolume: true });
 			p.setVolume(50 / 100);
 
-            app.bot.sendMessage(t, msg, `Now playing **${gr.SONGINFO.ARTIST} - ${gr.SONGINFO.TITLE}** in **${vcn}**`);
+            app.func.sendMessage(t, msg, `Now playing **${gr.SONGINFO.ARTIST} - ${gr.SONGINFO.TITLE}** in **${vcn}**`);
         }).catch((e) => console.log(e.stack));
     }
 });
@@ -113,7 +113,7 @@ mod.command("now", {
         em.timestamp();
         em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
         
-        app.bot.sendEmbed(t, msg, em);
+        app.func.sendEmbed(t, msg, em);
     }
 });
 
@@ -132,13 +132,13 @@ mod.command("stop", {
             channel = guild.channels.get(guild.members.get(app.bot.user.id).voiceState.channelID),
             vc = msg.member.voiceState.channelID;
         
-        if(vc == null || vc == "") return app.bot.sendMessage(t, msg, "You need to be in the voice channel to use this.");
-        if(!guild.members.has(app.bot.user.id)) return app.bot.sendMessage(t, msg, "Something went wrong please use the Report button on our website!");        
-        if(!vc) return app.bot.sendMessage(t, msg, `You need to be in ${channel.name} to stop the music!`);
+        if(vc == null || vc == "") return app.func.sendMessage(t, msg, "You need to be in the voice channel to use this.");
+        if(!guild.members.has(app.bot.user.id)) return app.func.sendMessage(t, msg, "Something went wrong please use the Report button on our website!");        
+        if(!vc) return app.func.sendMessage(t, msg, `You need to be in ${channel.name} to stop the music!`);
 
         let vcn = msg.member.guild.channels.get(vc).name;
 
-        app.bot.sendMessage(t, msg, `Leaving ${vcn}`);
+        app.func.sendMessage(t, msg, `Leaving ${vcn}`);
 
         app.bot.leaveVoiceChannel(vc);
     }
