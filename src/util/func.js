@@ -25,7 +25,7 @@ let
 module.exports = async(m) => {
 
     // messageCreate and interactionCreate Handler
-    m.func.getCommand = (msg, app) => {
+    m.func.getCommand = (app, msg) => {
         if(msg.member.user.bot) return;
 
         let
