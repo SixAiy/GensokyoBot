@@ -10,4 +10,4 @@ If you are interested, you can read about contributing to this project [here](ht
 GensokyoBot is licensed under the GNU GPL-v3 license.
 
 ## Special Thanks
-[Freyacodes](https://github.com/freyacodes) for the creation of GensokyoBot
+[Freyacodes](https://github.com/freyacodes) for the original creation of GensokyoBot
