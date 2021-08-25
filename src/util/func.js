@@ -15,13 +15,12 @@
     # This program is distributed under the terms of the GNU GPL.
     ######################################################################
 */
-
 "use strict"
 
-const { enablePost } = require('../conf');
 let 
-    conf = require('../conf'),
-    fetch = require('node-fetch');
+    conf        = require('../conf'),
+    { Webhook } = require('discord-webhook-node'),
+    fetch       = require('node-fetch');
 
 module.exports = async(m) => {
 
@@ -46,13 +45,31 @@ module.exports = async(m) => {
         } else {
             msg.content = msg.data.name;
         }
+
+        if(msg.member.guild.id == conf.guild_id && !conf.channel_restrictions.includes(msg.channel.id)) {
+            let respond = `${msg.member.user.username}!:  Please read <#${conf.channel_rules}> for server rules and only use commands in <#${conf.channel_bot_spam}>!`;
+            if(msg.token != undefined) {
+                msg.createMessage(respond);
+                //console.log(msg);
+                msg.defer()
+                app.func.Sleep(10000);
+                msg.deleteOriginalMessage(msg.id);
+                return;
+
+            } else {
+                return msg.channel.createMessage(respond).then(async(m) => {
+                    app.func.Sleep(10000);
+                    m.delete();
+                });
+            }
+        }
         
-        app.func.interactionCommands(app);
         for(let plugin in app._plugins) {
             let r = app._plugins[plugin].mod.getCommand(msg);
             if(r !== undefined) {
                 res = r;
                 if(level >= res.cmd.rank) {
+                    app.func.interactionCommands(app);
                     let args = res.res.args || "";
                     if(msg.token == undefined) return res.cmd.func("m", app, msg, args, sysLvl);
                     res.cmd.func("i", app, msg, args, sysLvl);
@@ -74,11 +91,12 @@ module.exports = async(m) => {
     // Main Functions
     m.func.permlevel = (app, msg) => {
         let permlvl = 0;
+        let checkTeam = app.bot.guilds.get(conf.guild_id).members.get(msg.member.user.id);
         const permOrder = app.func.perms.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
         while (permOrder.length) {
             const currentLevel = permOrder.shift();
             if(msg.member.guild && currentLevel.guildOnly) continue;
-            if(currentLevel.check(app, msg)) {
+            if(currentLevel.check(app, msg, checkTeam)) {
                 permlvl = currentLevel.level;
                 break;
             }
@@ -118,34 +136,118 @@ module.exports = async(m) => {
     m.func.countListeners = () => {};
 
     // Post Stats to listing site - will fix later
-    m.func.postStatsList = async(type, key, app, url) => {
+    m.func.postStatsList = async(app) => {
         if(!conf.enable_post) return;
-        let urls = [
-            "https://sentcord.com/api/bot/X712x2",
-            "https://carbonitex.net/discord/data/botdata.php",
-            "https://top.gg/api/bots/X712x2/stats",
-            "https://discord.bots.gg/api/v1/bots/X712x2/stats",
-            "https://discordbotlist.com/api/v1/bots/X712x2/stats",
-            "https://api.discordlist.space/v2/bots/X712x2",
-        ];
+    
+        let 
+            bot = app.bot.user.id,
+            //g = app.bot.guilds.size,
+            //s = app.bot.shards.size,
+            guilds = 3281,
+            shards = 3,
+            lists = [
+                {
+                    body:JSON.stringify({   
+                        shards: shards,         
+                        servers: guilds                     
+                    }), 
+                    key:conf.sentcord_token, 
+                    url:"https://sentcord.com/api/bot/botid.xyz-99474982"
+                },
+                { 
+                    body:JSON.stringify({    
+                        servercount: guilds           
+                    }), 
+                    key:conf.carbonitex_token, 
+                    url:"https://carbonitex.net/discord/data/botdata.php"
+                },
+                {
+                    body:JSON.stringify({   
+                        shardCount: shards,     
+                        server_count: guilds  
+                    }), 
+                    key:conf.topgg_token, 
+                    url:"https://top.gg/api/bot/botid.xyz-99474982"
+                },
+                {
+                    body:JSON.stringify({   
+                        shardCount: shards,     
+                        guildCount: guilds         
+                    }), 
+                    key:conf.discordbotsgg_token, 
+                    url:"https://discord.bots.gg/api/bot/botid.xyz-99474982"
+                },
+                {
+                    body:JSON.stringify({   
+                        guilds: guilds                                
+                    }), 
+                    key:conf.discordbotlist_token, 
+                    url:"https://discordbotlist.com/api/v1/bots/botid.xyz-99474982/stats"
+                },
+                {
+                    body:JSON.stringify({   
+                        serverCount: guilds                          
+                    }), 
+                    key:conf.discordlistspace_token, 
+                    url:"https://discordlist.space/api/v2/bots/botid.xyz-99474982"
+                },
+                {
+                    body:JSON.stringify({   
+                       
 
-        let d = await app.ipc.getStats();
-        let buildD = {};
-        if(type == "cb") {
-            fetch(`${url}?key=${key}&servercount=${d.guilds}&shardcount=${d.shardCount}`, { 
-                method: "POST"
-            }).then(r => r.json()).then(d => console.log(`Posted stats to ${url}`));
+                {
+                    body:JSON.stringify({   
+                        server_count: guilds                                
+                    }), 
+                    key:conf.discords_token, 
+                    url:"https://discords.com/bots/api/bot/botid.xyz-99474982"
+                },
+                {
+                    body: JSON.stringify({   
+                        shard_count: shards,    
+                        server_count: guilds        
+                    }), 
+                    key: conf.botsdiscordlabs_token, 
+                    url: "https://bots.discordlabs.org/v2/bot/botid.xyz-99474982/stats"
+                },
+                {
+                    body: JSON.stringify({   
+                        shards: shards,         
+                        servers: guilds             
+                    }), 
+                    key: conf.discordexlist_token, 
+                    url:"https://api.discordextremelist.xyz/v2/bot/botid.xyz-99474982/stats"
+                }
+            ];
+
+        for(let a of lists) {
+            a.url = a.url.replace("botid.xyz-99474982", bot);
+            if(a.url.includes("carbonitex.net")) {
+                console.log(a);
+                /*fetch(a.url + a.key, { 
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: a.body
+                })
+                .then(r => r.json())
+                .then(d => console.log(a.url, d))
+                .catch((e) => console.log(a.url, e.stack));
+                */
+            }
+            /*fetch(a.url, { 
+                method: "POST",
+                headers: { 
+                    authorization: a.key, 
+                    "Content-Type": "application/json" 
+                },
+                body: a.body
+            })
+            .then(r => r.json())
+            .then(d => console.log(a.url, d))
+            .catch((e) => console.log(a.url, e.stack));
+            */
+
         }
-        if(type == "topgg") buildD = { server_count: d.guilds, shard_count: d.shardCount };
-        if(type == "dbgg") buildD = { guildCount: d.guilds, shardCount: d.shardCount };
-        if(type == "dbl") buildD = { guilds: d.guilds };
-        if(type == "dls") buildD = { serverCount: d.guilds };
-
-        fetch(url, { 
-            method: "POST",
-            headers: { authorization: key, "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        }).then(r => r.json()).then(d => console.log(`Posted stats to ${url}`));
         
     };
 
@@ -160,44 +262,35 @@ module.exports = async(m) => {
         { 
             level: 1, 
             name: "Guild Mod", 
-            check: (app, msg) => false
+            check: (app, msg, team) => false
         },
         { 
             level: 2, 
             name: "Guild Admin", 
-            check: (app, msg) => false
+            check: (app, msg, team) => false
         },
         */
         { 
             level: 3, 
             name: "Guild Owner", 
-            check: (app, msg) => msg.member.guild.ownerID == msg.member.user.id
+            check: (app, msg, team) => msg.member.guild.ownerID == msg.member.user.id
         },
         { 
             level: 4, 
             name: "Bot Mod", 
-            check: (app, msg) => app.bot.guilds.get(conf.guild_id).members.get(msg.member.user.id).roles.includes(conf.bot_mod)
+            check: (app, msg, team)  => team.roles.includes(conf.bot_mod)
         },
         { 
             level: 5, 
             name: "Bot Admin", 
-            check: (app, msg) => app.bot.guilds.get(conf.guild_id).members.get(msg.member.user.id).roles.includes(conf.bot_admin)
+            check: (app, msg, team) => team.roles.includes(conf.bot_admin)
         },
         { 
             level: 6, 
             name: "Bot Owner", 
-            check: (app, msg) => conf.bot_owners.includes(msg.member.user.id)
+            check: (app, msg, team) => conf.bot_owners.includes(msg.member.user.id)
         }
     ];
-
-    // Global Sleep Function for (this/app)
-    m.func.Sleep = (x) => {
-        let date = Date.now();
-        let curDate = null;
-        do { 
-            curDate = Date.now(); 
-        } while(curDate - date < x);
-    }
 
     // interaction Commands Register
     m.func.interactionCommands = async(app) => {
@@ -220,12 +313,27 @@ module.exports = async(m) => {
                             type: 1
                         });
                         // sleep for 5 seconds so we dont slam discords api
-                        m.Sleep(5000);
+                        m.func.Sleep(5000);
                     }
                     return;
                 }
             });
         });
+    }
+
+    // Global Sleep Function for (this/app)
+    m.func.Sleep = (x) => {
+        let date = Date.now();
+        let curDate = null;
+        do { 
+            curDate = Date.now(); 
+        } while(curDate - date < x);
+    }
+
+    // Global Webhook Function
+    m.func.sendHook = (webhook, msg) => {
+        let hook = new Webhook(webhook);
+        hook.send(msg);
     }
 
 }

@@ -29,6 +29,10 @@ module.exports = {
     bot_owners:             [""], // Only place userIds in here.
     guild_id:               "",
 
+    channel_restrictions:   ["", ""],
+    channel_rules:          "",
+    channel_bot_spam:       "",
+
     game_status:            "online",
     game_name:              "",
     game_type:              1,

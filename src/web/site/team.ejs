@@ -13,7 +13,6 @@
                 <br>
                 <div class="content">
                     <h1 class="title">Team</h1>
-                    <h3 class="subtitle">Management</h3>
                 </div>
                 <div class="columns is-multiline">
                     <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
@@ -27,153 +26,121 @@
                                 <div class="media">
                                     <div class="media-content">
                                         <p class="title is-4">Freya</p>
-                                        <p class="subtitle is-6">Creator</p>
+                                        <p class="subtitle is-6">
+                                            <span style="color: rgb(23, 191, 224)">
+                                                Owner, Creator
+                                            </span>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
-                        <div class="card">
-                            <div class="card-image">
-                                <figure class="image is-square">
-                                    <img src="https://cdn.discordapp.com/avatars/188571987835092992/70aacefadaafeab249a8f3e3bc81314f.jpg?size=256" style="object-fit:cover;" alt="Album Art">
-                                </figure>
-                            </div>
-                            <div class="card-content">
-                                <div class="media">
-                                    <div class="media-content">
-                                        <p class="title is-4">Allie | アリー</p>
-                                        <p class="subtitle is-6">Owner, Developer</p>
+                    <% for(let user of data.owner) { %>
+                        <% if(user.id != "112615849566744576") { %>
+                            <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
+                                <div class="card">
+                                    <div class="card-image">
+                                        <figure class="image is-square">
+                                            <img src="<%= user.avatar %>" style="object-fit:cover;" alt="Album Art">
+                                        </figure>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="media">
+                                            <div class="media-content">
+                                                <p class="title is-4"><%= user.username %></p>
+                                                <p class="subtitle is-6">
+                                                    <span style="color: #<%= user.role.color %>">
+                                                        Owner, <%= user.role.name %>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        <% } %>
+                    <% } %>
+                    <% for(let member of data.admin) { %>
+                        <% if(member.id != "112615849566744576") { %>
+                            <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
+                                <div class="card">
+                                    <div class="card-image">
+                                        <figure class="image is-square">
+                                            <img src="<%= member.avatar %>" style="object-fit:cover;" alt="Album Art">
+                                        </figure>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="media">
+                                            <div class="media-content">
+                                                <p class="title is-4"><%= member.username %></p>
+                                                <p class="subtitle is-6">
+                                                    <span style="color: #<%= member.role.color %>">
+                                                        <%= member.role.name %>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } %>
+                    <% for(let member of data.mod) { %>
+                        <% if(member.id != "112615849566744576") { %>
+                            <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
+                                <div class="card">
+                                    <div class="card-image">
+                                        <figure class="image is-square">
+                                            <img src="<%= member.avatar %>" style="object-fit:cover;" alt="Album Art">
+                                        </figure>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="media">
+                                            <div class="media-content">
+                                                <p class="title is-4"><%= member.username %></p>
+                                                <p class="subtitle is-6">
+                                                    <span style="color: #<%= member.role.color %>">
+                                                        <%= member.role.name %>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } %>
                 </div>
                 <div class="content">
-                    <h3 class="subtitle">Staff</h3>
+                    <h3 class="subtitle">Contributors</h3>
                 </div>
                 <div class="columns is-multiline">
-                    <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
-                        <div class="card">
-                            <div class="card-image">
-                                <figure class="image is-square">
-                                    <img src="https://cdn.discordapp.com/avatars/112612543125520384/f0ebc0e921783e37d66f194fdcefdeaa.webp?size=256" style="object-fit:cover;" alt="Album Art">
-                                </figure>
-                            </div>
-                            <div class="card-content">
-                                <div class="media">
-                                    <div class="media-content">
-                                        <p class="title is-4">Sorch</p>
-                                        <p class="subtitle is-6">Admin, Contributor</p>
+                    <% for(let member of data.con) { %>
+                        <% if(member.id != "112615849566744576") { %>
+                            <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
+                                <div class="card">
+                                    <div class="card-image">
+                                        <figure class="image is-square">
+                                            <img src="<%= member.avatar %>" style="object-fit:cover;" alt="Album Art">
+                                        </figure>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="media">
+                                            <div class="media-content">
+                                                <p class="title is-4"><%= member.username %></p>
+                                                <p class="subtitle is-6">
+                                                    <span style="color: #<%= member.role.color %>">
+                                                        <%= member.role.name %>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
-                        <div class="card">
-                            <div class="card-image">
-                                <figure class="image is-square">
-                                    <img src="https://cdn.discordapp.com/avatars/268383799132291072/82c46d82beb3df13f0bec0bdbac9e88a.jpg?size=256" style="object-fit:cover;" alt="Album Art">
-                                </figure>
-                            </div>
-                            <div class="card-content">
-                                <div class="media">
-                                    <div class="media-content">
-                                        <p class="title is-4">Phoenix</p>
-                                        <p class="subtitle is-6">Admin, Contributor</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
-                        <div class="card">
-                            <div class="card-image">
-                                <figure class="image is-square">
-                                    <img src="https://cdn.discordapp.com/avatars/419958345487745035/a_201e60f6771ec0f36ee9933fbd16c032.gif?size=256" style="object-fit:cover;" alt="Album Art">
-                                </figure>
-                            </div>
-                            <div class="card-content">
-                                <div class="media">
-                                    <div class="media-content">
-                                        <p class="title is-4">J_DDev</p>
-                                        <p class="subtitle is-6">Moderator, Contributor</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
-                        <div class="card">
-                            <div class="card-image">
-                                <figure class="image is-square">
-                                    <img src="https://cdn.discordapp.com/avatars/97437499734904832/d76d1e844662925406a2c66eaa341949.webp?size=256" style="object-fit:cover;" alt="Album Art">
-                                </figure>
-                            </div>
-                            <div class="card-content">
-                                <div class="media">
-                                    <div class="media-content">
-                                        <p class="title is-4">Rebecca ♡</p>
-                                        <p class="subtitle is-6">Moderator</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
-                        <div class="card">
-                            <div class="card-image">
-                                <figure class="image is-square">
-                                    <img src="https://cdn.discordapp.com/avatars/263075293101686786/4285f7615b0b61a8133bf45c804b0cbf.webp?size=256" style="object-fit:cover;" alt="Album Art">
-                                </figure>
-                            </div>
-                            <div class="card-content">
-                                <div class="media">
-                                    <div class="media-content">
-                                        <p class="title is-4">Xenon</p>
-                                        <p class="subtitle is-6">Moderator</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
-                        <div class="card">
-                            <div class="card-image">
-                                <figure class="image is-square">
-                                    <img src="https://cdn.discordapp.com/avatars/265055292465741824/eaa31aa6d90c82edad7d143214945e4f.webp?size=256" style="object-fit:cover;" alt="Album Art">
-                                </figure>
-                            </div>
-                            <div class="card-content">
-                                <div class="media">
-                                    <div class="media-content">
-                                        <p class="title is-4">NiceLR</p>
-                                        <p class="subtitle is-6">Moderator</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column is-one-fifth-fullhd is-3-widescreen is-4-desktop is-6-tablet">
-                        <div class="card">
-                            <div class="card-image">
-                                <figure class="image is-square">
-                                    <img src="https://cdn.discordapp.com/avatars/218772716814204930/03c0e055652f294a017ef306fd30a95a.webp?size=256" style="object-fit:cover;" alt="Album Art">
-                                </figure>
-                            </div>
-                            <div class="card-content">
-                                <div class="media">
-                                    <div class="media-content">
-                                        <p class="title is-4">LilyScarlet</p>
-                                        <p class="subtitle is-6">Moderator</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        <% } %>
+                    <% } %>
                 </div>
             <!--
                 <div class="content">

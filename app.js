@@ -19,11 +19,12 @@
 
 let 
     Eris            = require('eris'),
-    { Webhook }     = require('discord-webhook-node'),
     { clear }       = require('console'),
+    //{ spawn }       = require('child_process'),
     conf            = require('./src/conf'),
     man             = require('./src/util/man'),
-    bot             = new Eris(conf.bot_token, { maxShards: conf.eris_shards, getAllUsers: conf.eris_users, intents: conf.eris_intents }),
+    //exec            = spawn(`fuser`, ["-k", "-n", "tcp", `${conf.web_port}`]),
+    bot             = new Eris(conf.bot_token, conf.eris_options),
     modman          = new man.ModuleManager(`${process.cwd()}/src/modules/`),
     app             = { bot, func: {}, modman };
 
@@ -41,33 +42,32 @@ require('./src/util/func')(app); // Functions
 app.bot.on("interactionCreate", (msg) => app.func.getCommand(app, msg));
 app.bot.on("messageCreate", (msg) => app.func.getCommand(app, msg));
 
-app.bot.on("error", (e) => {
-    //sendHook(conf.webhook_error_log, (`\`\`\`${e.stack}\`\`\``);
-    console.log(e.stack);
-}); 
-
-// Discord Events
+// Ready
 app.bot.on("ready", () => {
-    app.func.interactionCommands(app);
     app.bot.editStatus(conf.game_status, { name: conf.game_name, type: conf.game_type });
     console.log("Discord", "Ready!");
-    require('./src/web')(app); // Website
-});
-app.bot.on("guildCreate", (g) => {
-    let hook = conf.discord.hooks.join_leave;
-    sendHook(conf.webhook_guild_log, `<:join:877006355746136064> Guild: **${g.name}** (\`${g.id}\`)`);
-});
-app.bot.on("guildDelete", (g) => {
-    let hook = conf.discord.hooks.join_leave;
-    sendHook(conf.webhook_guild_log, `<:leave:877006244794220585> Guild: **${g.name}** (\`${g.id}\`)`);
 });
 
-// autoPost
-// Coming soon :P
+// Guilds Event
+app.bot.on("guildCreate", (g) => app.func.sendHook(conf.webhook_guild_log, `<:join:877006355746136064> Guild: **${g.name}** (\`${g.id}\`)`));
+app.bot.on("guildDelete", (g) => app.func.sendHook(conf.webhook_guild_log, `<:leave:877006244794220585> Guild: **${g.name}** (\`${g.id}\`)`));
 
+// Error Handling!
+app.bot.on("error", (e) => console.log(e.stack)); 
+//exec.on("error", (e) => console.log(e.stack));
+
+// autoPost - putting the start of here to make it simple :P
+setTimeout(() => {
+    console.log("Posting");
+    if(!conf.enable_post) return;
+    app.func.postStatsList(app);
+}, 10000);
 
 // Functions for app.js
 function sendHook(webhook, msg) {
     let hook = new Webhook(webhook);
     hook.send(msg);
 }
+
+// Website includes outside of Ready function because it crashes everything if its pushed.
+require('./src/web')(app);

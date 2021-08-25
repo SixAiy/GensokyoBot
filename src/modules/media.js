@@ -40,14 +40,14 @@ mod.command("play", {
         if(!vc) return app.func.sendMessage(t, msg, "You need to be in a voice channel");
 
         let 
-            gr = await fetch(conf.music_api).then(r => r.json()),
+            gr = await fetch(`${conf.gr_url}${conf.gr_api}${conf.gr_api_playing}`).then(r => r.json()),
             vcn = msg.member.guild.channels.get(vc).name;
 
         if(t == "i") await msg.defer();
         app.bot.joinVoiceChannel(vc).then(async(p) => {
             if(p.playing) return app.func.sendMessage(t, msg, `Already Playing in **${vcn}**`);
 
-			p.play(conf.music_stream, { inlineVolume: true });
+			p.play(`${conf.gr_stream}`, { inlineVolume: true });
 			p.setVolume(50 / 100);
 
             app.func.sendMessage(t, msg, `Now playing **${gr.SONGINFO.ARTIST} - ${gr.SONGINFO.TITLE}** in **${vcn}**`);
@@ -69,7 +69,7 @@ mod.command("now", {
     rank: 0,
     func: async function(t, app, msg, args, rank) {
         let 
-            gr = await fetch(conf.music_api).then(r => r.json()),
+            gr = await fetch(`${conf.gr_url}${conf.gr_api}${conf.gr_api_playing}`).then(r => r.json()),
             current = {
                 arturl: "https://gensokyoradio.net/images/albums/500/",
                 songid: gr.SONGDATA.SONGID,

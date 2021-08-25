@@ -33,7 +33,6 @@ mod.command("help", {
     func: async function(t, app, msg, args, rank) {
         let 
             web = "https://gensokyobot.com",
-            output = "",
             cmds = "",
             desc = "",
             totalCmds = "",
@@ -41,34 +40,27 @@ mod.command("help", {
             mods = app.modman.getPlugins(),
             em = app.bot.makeEmbed();
 
-        em.field("Help", `[Commands](${web}/cmds)\n[Status](https://status.sixaiy.com)`, true);
-        em.field(`Support`, `[Invite](https://discord.com/oauth2/authorize?client_id=${app.bot.user.id}&scope=bot%20applications.commands&permissions=${conf.invite_perms})\n[Support](${conf.guild_invite})`, true);
+        em.field("Help", `[Commands](${web}/cmds)\n[Status](https://status.sixaiy.com)\n[Support](${conf.guild_invite})`, true);
+        em.field(`Listen`, `[Discord](https://discord.com/oauth2/authorize?client_id=${app.bot.user.id}&scope=bot%20applications.commands&permissions=${conf.invite_perms})\n[Web](${web}/playing)`, true);
         em.blankfield();
-
+        
         mods.map((m) => {
             let 
                 data = app._plugins[m].mod.getAllCommands(),
-                name = "",
                 loaded = data.map((md) => {
                     totalCmds++
                     if(rank.level >= md.rank) {
-                        let fix = m.charAt(0).toUpperCase() + m.slice(1);
-                        name = fix.replace(/\.js$/i, "");
                         usableCmds++
                         return {name: `▫️ **${md.name}**`, desc: `-${md.desc}`};
                     }
                 });
-            //console.log(loaded);
             for(let cmd of loaded) {
-                if(cmd.name != undefined) {
+                if(cmd != undefined) {
                     cmds += `${cmd.name}\n`;
                     desc += `${cmd.desc}\n`;
                 }
             }
-            //console.log(cmds, desc);
-            //output += em.field(name, `\n${loaded.join("\n")}`, false);
         });
-        //return app.func.sendMessage(t, msg, cmds);
         em.field("Commands", cmds, true);
         em.field("Description", desc, true);
         em.blankfield();
@@ -185,6 +177,11 @@ mod.command("bot", {
             if(cmd[0] == "testing12345") {
                 let ping = new Date() - msg.timestamp;
                 msg.channel.createMessage(`ping is ${ping}`);
+            }
+            if(cmd[0] == "gup") {
+                let gx = await app.bot.getUserProfile(cmd[1]);
+                console.log(gx);
+                msg.channel.createMessage("Check Console!");
             }
     }
 });

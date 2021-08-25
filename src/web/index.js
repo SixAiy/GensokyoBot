@@ -39,51 +39,80 @@ module.exports = (app) => {
     app.web.use(bodyParser.urlencoded({ extended: true }));
 
     buildPage(app, "/", "Home", "index");
-    buildPage(app, '/music', "Now Playing", "music");
+    buildPage(app, '/playing', "Now Playing", "music");
     buildPage(app, '/privacy', "Privacy Policy", "inc/legal/privacy");
 
     redirectPage(app, '/status', "http://status.sixaiy.com");
     redirectPage(app, '/discord', conf.guild_invite);
     redirectPage(app, '/invite', `https://discord.com/oauth2/authorize?client_id=${app.bot.user.id}&scope=bot%20applications.commands&permissions=${conf.invite_perms}`);
-
+    
     app.web.get('/team', async(req, res) => {
         let 
             guild = app.bot.guilds.get(conf.guild_id),
-            team = [],
-            role = "",
-            team_admin = conf.bot_admin,
-            team_mod = conf.bot_mod;
 
-        res.json({team_admin, team_mod, guild});
+            ownid = conf.bot_owner,
+            admid = conf.bot_admin,
+            modid = conf.bot_mod,
+            conid = conf.bot_contributor,
+
+            ownr = guild.roles.get(ownid),
+            admr = guild.roles.get(admid),
+            modr = guild.roles.get(modid),
+            conr = guild.roles.get(conid),
+            owner = [],
+            admin = [],
+            mod = [],
+            con = [];
+        
+        ownr.color = componentToHex(ownr.color);
+        admr.color = componentToHex(admr.color);
+        modr.color = componentToHex(modr.color);
+        conr.color = componentToHex(conr.color);
+
+        guild.members.map((m) => {
+            let 
+                u = m.user,
+                r = m.roles;
+
+            if(r.includes(ownid)) return owner.push({id:u.id, username:u.username, avatar:u.avatarURL.replace("?size=128", "?size=256"), role:ownr});
+            if(r.includes(admid)) return admin.push({id:u.id, username:u.username, avatar:u.avatarURL.replace("?size=128", "?size=256"), role:admr});
+            if(r.includes(modid)) return mod.push({id:u.id, username:u.username, avatar:u.avatarURL.replace("?size=128", "?size=256"), role:modr});
+            if(r.includes(conid)) return con.push({id:u.id, username:u.username, avatar:u.avatarURL.replace("?size=128", "?size=256"), role:conr});
+        });
+
+        res.render(path.resolve(`${site}/team.ejs`), {
+            title: "Team",
+            data: {owner, admin, mod, con}
+        });
     });
     app.web.get('/cmds', async(req, res) => {
         let
             mods = app.modman.getPlugins(),
-            commands = {};
+            cmds = [];
 
         mods.map((m) => {
             let 
-                d = app._plugins[m].mod.getAllCommands(),
-                name = "",
-                cmds = d.map((md) => {
+                data = app._plugins[m].mod.getAllCommands(),
+                loaded = data.map((md) => {
                     if(0 >= md.rank) {
-                        name = m.replace(/\.js$/i, "");
-                        if(md.name != "" || md.name != null || name != "" || name != null) {
-                            return { cmd: md.name, desc: md.desc }
-                        }
+                        return {name: `▫️ ${md.name}`, desc: `${md.desc}`};
                     }
                 });
-            commands[name] = cmds.filter((e) => { return e != nill });
+            for(let cmd of loaded) {
+                if(cmd != undefined) {
+                    cmds.push({ name: cmd.name, desc: cmd.desc });
+                }
+            }
         });
 
         res.render(path.resolve(`${site}/cmds.ejs`), {
             title: "Commands",
-            commands
+            cmds
         });
 
     });
     app.web.get('/api/playing', async(req, res) => {
-        let x = await fetch(conf.music_api).then((r) => r.json());
+        let x = await fetch(`${conf.gr_url}${conf.gr_api}${conf.gr_api_playing}`).then((r) => r.json());
         res.json(x);
     });
 
@@ -106,4 +135,8 @@ function handleErrorMsg(msg) {
         error: true,
         msg: msg
     }
+}
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
 }
