@@ -46,7 +46,7 @@ module.exports = async(m) => {
             msg.content = msg.data.name;
         }
 
-        if(msg.member.guild.id == conf.guild_id && !conf.channel_restrictions.includes(msg.channel.id)) {
+        if(msg.member.guild.id == conf.guild_id && !conf.channel_allowed.includes(msg.channel.id)) {
             let respond = `${msg.member.user.username}!:  Please read <#${conf.channel_rules}> for server rules and only use commands in <#${conf.channel_bot_spam}>!`;
             if(msg.token != undefined) {
                 msg.createMessage(respond);
@@ -134,122 +134,6 @@ module.exports = async(m) => {
     // Statstics Functions
     m.func.activePlayers = () => {};
     m.func.countListeners = () => {};
-
-    // Post Stats to listing site - will fix later
-    m.func.postStatsList = async(app) => {
-        if(!conf.enable_post) return;
-    
-        let 
-            bot = app.bot.user.id,
-            //g = app.bot.guilds.size,
-            //s = app.bot.shards.size,
-            guilds = 3281,
-            shards = 3,
-            lists = [
-                {
-                    body:JSON.stringify({   
-                        shards: shards,         
-                        servers: guilds                     
-                    }), 
-                    key:conf.sentcord_token, 
-                    url:"https://sentcord.com/api/bot/botid.xyz-99474982"
-                },
-                { 
-                    body:JSON.stringify({    
-                        servercount: guilds           
-                    }), 
-                    key:conf.carbonitex_token, 
-                    url:"https://carbonitex.net/discord/data/botdata.php"
-                },
-                {
-                    body:JSON.stringify({   
-                        shardCount: shards,     
-                        server_count: guilds  
-                    }), 
-                    key:conf.topgg_token, 
-                    url:"https://top.gg/api/bot/botid.xyz-99474982"
-                },
-                {
-                    body:JSON.stringify({   
-                        shardCount: shards,     
-                        guildCount: guilds         
-                    }), 
-                    key:conf.discordbotsgg_token, 
-                    url:"https://discord.bots.gg/api/bot/botid.xyz-99474982"
-                },
-                {
-                    body:JSON.stringify({   
-                        guilds: guilds                                
-                    }), 
-                    key:conf.discordbotlist_token, 
-                    url:"https://discordbotlist.com/api/v1/bots/botid.xyz-99474982/stats"
-                },
-                {
-                    body:JSON.stringify({   
-                        serverCount: guilds                          
-                    }), 
-                    key:conf.discordlistspace_token, 
-                    url:"https://discordlist.space/api/v2/bots/botid.xyz-99474982"
-                },
-                {
-                    body:JSON.stringify({   
-                       
-
-                {
-                    body:JSON.stringify({   
-                        server_count: guilds                                
-                    }), 
-                    key:conf.discords_token, 
-                    url:"https://discords.com/bots/api/bot/botid.xyz-99474982"
-                },
-                {
-                    body: JSON.stringify({   
-                        shard_count: shards,    
-                        server_count: guilds        
-                    }), 
-                    key: conf.botsdiscordlabs_token, 
-                    url: "https://bots.discordlabs.org/v2/bot/botid.xyz-99474982/stats"
-                },
-                {
-                    body: JSON.stringify({   
-                        shards: shards,         
-                        servers: guilds             
-                    }), 
-                    key: conf.discordexlist_token, 
-                    url:"https://api.discordextremelist.xyz/v2/bot/botid.xyz-99474982/stats"
-                }
-            ];
-
-        for(let a of lists) {
-            a.url = a.url.replace("botid.xyz-99474982", bot);
-            if(a.url.includes("carbonitex.net")) {
-                console.log(a);
-                /*fetch(a.url + a.key, { 
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: a.body
-                })
-                .then(r => r.json())
-                .then(d => console.log(a.url, d))
-                .catch((e) => console.log(a.url, e.stack));
-                */
-            }
-            /*fetch(a.url, { 
-                method: "POST",
-                headers: { 
-                    authorization: a.key, 
-                    "Content-Type": "application/json" 
-                },
-                body: a.body
-            })
-            .then(r => r.json())
-            .then(d => console.log(a.url, d))
-            .catch((e) => console.log(a.url, e.stack));
-            */
-
-        }
-        
-    };
 
     // Permission System Storage for messageCreate
     m.func.perms = [

@@ -51,21 +51,6 @@ module.exports = {
 
     embed_color:             0x421250,
 
-    web_domain:             "",
-    web_port:                4000,
-
-    // Bot Listing Places
-    enable_post:             true,
-    sentcord_token:         "",
-    carbonitex_token:       "",
-    topgg_token:            "",
-    discordbotsgg_token:    "",
-    discordbotlist_token:   "",
-    discordlistspace_token: "",
-    dbotsco_token:          "",
-    discords_token:         "",
-    botsdiscordlabs_token:  "",
-    discordexlist_token:    "",
 
     // GensokyoRadio Posting Locations
     gr_api_key:             "",

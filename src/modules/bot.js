@@ -40,8 +40,8 @@ mod.command("help", {
             mods = app.modman.getPlugins(),
             em = app.bot.makeEmbed();
 
-        em.field("Help", `[Commands](${web}/cmds)\n[Status](https://status.sixaiy.com)\n[Support](${conf.guild_invite})`, true);
-        em.field(`Listen`, `[Discord](https://discord.com/oauth2/authorize?client_id=${app.bot.user.id}&scope=bot%20applications.commands&permissions=${conf.invite_perms})\n[Web](${web}/playing)`, true);
+        em.field("Help", `[Status](https://sixnoc.com)\n[Support](${conf.guild_invite})`, true);
+        em.field(`Listen`, `[Discord](https://discord.com/oauth2/authorize?client_id=${app.bot.user.id}&scope=bot%20applications.commands&permissions=${conf.invite_perms})\n[Web](https://gensokyoradio.net/playing)`, true);
         em.blankfield();
         
         mods.map((m) => {

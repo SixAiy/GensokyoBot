@@ -20,10 +20,8 @@
 let 
     Eris            = require('eris'),
     { clear }       = require('console'),
-    //{ spawn }       = require('child_process'),
     conf            = require('./src/conf'),
     man             = require('./src/util/man'),
-    //exec            = spawn(`fuser`, ["-k", "-n", "tcp", `${conf.web_port}`]),
     bot             = new Eris(conf.bot_token, conf.eris_options),
     modman          = new man.ModuleManager(`${process.cwd()}/src/modules/`),
     app             = { bot, func: {}, modman };
@@ -55,19 +53,3 @@ app.bot.on("guildDelete", (g) => app.func.sendHook(conf.webhook_guild_log, `<:le
 // Error Handling!
 app.bot.on("error", (e) => console.log(e.stack)); 
 //exec.on("error", (e) => console.log(e.stack));
-
-// autoPost - putting the start of here to make it simple :P
-setTimeout(() => {
-    console.log("Posting");
-    if(!conf.enable_post) return;
-    app.func.postStatsList(app);
-}, 10000);
-
-// Functions for app.js
-function sendHook(webhook, msg) {
-    let hook = new Webhook(webhook);
-    hook.send(msg);
-}
-
-// Website includes outside of Ready function because it crashes everything if its pushed.
-require('./src/web')(app);
