@@ -1,6 +1,6 @@
 {
-  "name": "gensokyobot-v5",
-  "version": "0.5.0",
+  "name": "gensokyobot",
+  "version": "0.5.1",
   "description": "",
   "main": "app.js",
   "scripts": {
@@ -17,9 +17,7 @@
   },
   "homepage": "https://sixaiy.dev/",
   "dependencies": {
-    "axios": "^0.21.4",
     "console": "^0.7.2",
-    "discord-webhook-node": "^1.1.8",
     "eris": "github:DonovanDMC/eris#everything",
     "fs": "^0.0.1-security",
     "node-fetch": "^2.6.1",

@@ -21,7 +21,6 @@ var _ = require("underscore");
 function ModuleManager(path) {
 	this.pluginslist = {};
 	this.pathBFU = path
-
 };
 ModuleManager.prototype.LoadPlugins = function() {
 	var self = this;

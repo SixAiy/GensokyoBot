@@ -92,7 +92,6 @@ class Embed {
         this.title = title.toString().substring(0, 256);
         return this;
     }
-
     thumbnail(url) {
         this.thumbnail = {
             url
@@ -101,6 +100,40 @@ class Embed {
     }
     url(url) {
         this.url = url;
+        return this;
+    }
+};
+class Components {
+    constructor(data = {}) {
+        Object.assign(this, data);
+        return this;
+    }
+    type(data) {
+        this.type = data;
+        return this;
+    }
+    style(data) {
+        this.style = data;
+        return this;
+    }
+    label(data) {
+        this.label = data;
+        return this;
+    }
+    emoji(data) {
+        this.emoji = data;
+        return this;
+    }
+    id(id) {
+        this.custom_id = id;
+        return this;
+    }
+    url(link) {
+        this.url = link;
+        return this;
+    }
+    disabled(boolean) {
+        this.disabled = boolean;
         return this;
     }
 };
@@ -169,6 +202,10 @@ class EvaluatedPermissions {
 module.exports = (Eris, options = {}) => {
     Eris.EvaluatedPermissions = EvaluatedPermissions;
 
+    Eris.Client.prototype.makeComponent = function() {
+        return new Components;
+    }
+
     Eris.Client.prototype.makeEmbed = function() {
         return new Embed;
     };
@@ -189,11 +226,24 @@ module.exports = (Eris, options = {}) => {
             embeds: [embed]
         });
     }
+    Eris.ComponentInteraction.prototype.createComponentEmbed = function(type, embed, component) {
+        return this.createMessage({
+            embeds: [embed],
+            component: [{ type: type, component: [component] }]
+        });
+    }
+    Eris.ComponentInteraction.prototype.createComponentMessage = function(type, content, component) {
+        return this.createMessage({
+            content,
+            component: [{ type: type, component: [component] }]
+        });
+    }
     Eris.ComponentInteraction.prototype.createEmbed = function(embed) {
         return this.createMessage({
             embeds: [embed]
         });
     }
+
     Eris.Client.prototype.getAllTextChannelsAsCount = function() {
         let n = 0;
         const client = this ? this.shard.client : this._client;

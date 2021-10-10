@@ -28,7 +28,7 @@ mod.command("stab", {
     interaction: true,
     desc: "Shows a anime gif of stabbing",
     rank: 0,
-    func: async function(t, app, msg, args, rank) {
+    func: async function(app, msg, args, rank) {
         let 
             imgs = [
                 'https://i.imgur.com/VjggulR.gif',
@@ -46,14 +46,14 @@ mod.command("stab", {
         em.color(conf.embed_color);
         em.image(img);
 
-        app.func.sendEmbed(t, msg, em);
+        msg.createEmbed(em);
     }
 });
 mod.command("facedesk", {
     interaction: true,
     desc: "Gif of Anime facedesking",
     rank: 0,
-    func: async function(t, app, msg, args, rank) {
+    func: async function(app, msg, args, rank) {
         let 
             imgs = [
                 "https://i.imgur.com/csdvorU.gif",
@@ -76,14 +76,14 @@ mod.command("facedesk", {
         em.color(conf.embed_color);
         em.image(img);
 
-        app.func.sendEmbed(t, msg, em);
+        msg.createEmbed(em);
     }
 });
 mod.command("hug", {
     interaction: true,
     desc: "You can hug someone",
     rank: 0,
-    func: async function(t, app, msg, args, rank) {
+    func: async function(app, msg, args, rank) {
         let 
             imgs = [
                 "https://i.imgur.com/JrnxI9M.gif",
@@ -113,14 +113,14 @@ mod.command("hug", {
         em.color(conf.embed_color);
         em.image(img);
 
-        app.func.sendEmbed(t, msg, em);
+        msg.createEmbed(em);
     }
 })
 mod.command("pat", {
     interaction: true,
     desc: "Pat someone",
     rank: 0,
-    func: async function(t, app, msg, args, rank) {
+    func: async function(app, msg, args, rank) {
         let 
             imgs = [
                 'https://i.imgur.com/Iye3UIa.png',
@@ -176,14 +176,14 @@ mod.command("pat", {
         em.color(conf.embed_color);
         em.image(img);
 
-        app.func.sendEmbed(t, msg, em);
+        msg.createEmbed(em);
     }
 });
 mod.command("roll", {
     interaction: true,
     desc: "You roll around",
     rank: 0,
-    func: async function(t, app, msg, args, rank) {
+    func: async function(app, msg, args, rank) {
         let
             imgs = [
                 'https://i.imgur.com/7sLGFSl.gif',
@@ -228,20 +228,20 @@ mod.command("roll", {
         em.color(conf.embed_color);
         em.image(img);
 
-        app.func.sendEmbed(t, msg, em);
+        msg.createEmbed(em);
     }
 });
 mod.command("anime", {
     interaction: true,
     desc: "shows a gif of Animeeee!!",
     rank: 0,
-    func: async function(t, app, msg, args, rank) {
+    func: async function(app, msg, args, rank) {
         let em = app.bot.makeEmbed();
 
         em.color(conf.embed_color);
         em.image("http://i.imgur.com/93VahIh.png");
 
-        app.func.sendEmbed(t, msg, em);
+        msg.createEmbed(em);
     }
 });
 
