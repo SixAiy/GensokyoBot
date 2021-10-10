@@ -27,7 +27,6 @@ let
     modman          = new man.ModuleManager(`${process.cwd()}/src/modules/`),
     app             = { bot, func: {}, modman };
 
-
 clear();
 
 app.modman.LoadPlugins();
@@ -56,10 +55,6 @@ app.bot.on("ready", () => {
     app.func.interactionCommands(app);
     postStats(app);
 });
-
-// Guilds Event - Kind of bugged need to fix this :/
-//app.bot.on("guildCreate", (g) => app.func.sendHook(conf.webhook_guild_log, `<:join:877006355746136064> Guild: **${g.name}** (\`${g.id}\`)`));
-//app.bot.on("guildDelete", (g) => app.func.sendHook(conf.webhook_guild_log, `<:leave:877006244794220585> Guild: **${g.name}** (\`${g.id}\`)`));
 
 // Error Handling!
 app.bot.on("error", (e) => console.log(e.stack)); 

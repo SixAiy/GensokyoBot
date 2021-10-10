@@ -87,7 +87,7 @@ mod.command("now", {
 
         let em = app.bot.makeEmbed();
         em.color(conf.embed_color);
-        em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/static/images/partners/gr.png", conf.m)
+        em.author("Gensokyo Radio - Music. Games. Touhou");
         //em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/_gb/gr.png", conf.web.links.radio);
         em.title(`${current.artist} - ${current.title} (${current.circle})`);
         em.url(current.albumurl);

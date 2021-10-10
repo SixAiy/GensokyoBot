@@ -52,7 +52,6 @@ module.exports = async(app) => {
                 body: { server_count: guilds, shard_count: shards }
             },
             {
-                name: "discord.boats",
                 link: `https://discord.boats/api/bot/${botid}`,
                 key: conf.list_discordboats,
                 body: { server_count: guilds }

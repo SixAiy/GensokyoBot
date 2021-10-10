@@ -62,10 +62,7 @@ mod.command("help", {
             mdata.map((md) => {
                 cmd_name += `${md.name}\n`;
                 cmd_desc += `${md.desc}\n`;
-                //return (`✦ ${md.name}: ${md.desc}`);
-            });
-            //out += `${loaded.join("\n")}`;
-            
+            });            
         });
         em.author("Commands List");
         em.field("Command", cmd_name, true);
@@ -87,7 +84,6 @@ mod.command("stats", {
             loadavg = os.loadavg(),
             totalram = (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
             usedram = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
-            freeram = ((process.memoryUsage()['rss'] - process.memoryUsage()['heapUsed']) / 1024 / 1024).toFixed(2),
             uptime = process.uptime();
                 
                 
