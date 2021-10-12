@@ -34,7 +34,7 @@
 
 "use strict"
 
-function Module(name) {x
+function Module(name) {
     if(name == undefined) throw new Error("Module name undefined.");
     this._name = name;
     this._commands = [];
