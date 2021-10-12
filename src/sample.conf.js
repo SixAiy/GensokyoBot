@@ -24,6 +24,7 @@ module.exports = {
     api:        "",
     url:        "https://api.o7.fyi",
     stream:     "https://stream.gensokyoradio.net/2/",
+    site:       "https://gensokyobot.com",
     
     state:      "online", 
     option:     { name: "/help", type: 0 },

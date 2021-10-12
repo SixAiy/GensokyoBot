@@ -36,19 +36,19 @@ mod.command("help", {
                     type: 2,
                     label: "Status",
                     style: 5,
-                    url: "https://gensokyobot.com/status"
+                    url: `${conf.site}/status`
                 },
                 {
                     type: 2,
                     label: "Support",
                     style: 5,
-                    url: "https://gensokyobot.com/support"
+                    url: `${conf.site}/support`
                 },
                 {
                     type: 2,
                     label: "Invite",
                     style: 5,
-                    url: "https://gensokyobot.com/invite"
+                    url: `${conf.site}/invite`
                 }
             ],
             mods = app.modman.getPlugins(),
