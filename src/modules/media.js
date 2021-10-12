@@ -3,9 +3,9 @@
     # File: media.js
     # Title: A Radio Music Bot
     # Author: SixAiy <me@sixaiy.com>
-    # Version: 0.5a
+    # Version: 5.2
     # Description:
-    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
+    #  A Discord bot for playing the Gensokyo Radio.
     #####################################################################
 
     #####################################################################
@@ -36,17 +36,17 @@ mod.command("play", {
         if(!vc) return msg.createMessage("You need to be in a voice channel");
 
         let 
-            gr = await fetch(`https://api.o7.fyi/v3/gb/playing`).then(r => r.json()),
+            gr = await fetch(`${conf.url}/gr/live`).then(r => r.json()),
             vcn = msg.member.guild.channels.get(vc).name;
 
         await msg.defer();
         app.bot.joinVoiceChannel(vc).then(async(p) => {
             if(p.playing) return msg.createMessage(`Already Playing in **${vcn}**`);
 
-			p.play(`${conf.gr_stream}`, { inlineVolume: true });
+			p.play(`${conf.stream}`, { inlineVolume: true });
 			p.setVolume(50 / 100);
 
-            msg.createMessage(`Now playing **${gr.SONGINFO.ARTIST} - ${gr.SONGINFO.TITLE}** in **${vcn}**`);
+            msg.createMessage(`Now playing **${gr.artist} - ${gr.title}** in **${vcn}**`);
         }).catch((e) => console.log(e.stack));
     }
 });
@@ -56,27 +56,9 @@ mod.command("now", {
     rank: 0,
     func: async function(app, msg, args, rank) {
         let 
-            gr = await fetch(`https://api.o7.fyi/v3/gb/playing`).then(r => r.json()),
-            current = {
-                arturl: "https://gensokyoradio.net/images/albums/500/",
-                songid: gr.SONGDATA.SONGID,
-                title: gr.SONGINFO.TITLE,
-                artist: gr.SONGINFO.ARTIST,
-                album: gr.SONGINFO.ALBUM,
-                year: gr.SONGINFO.YEAR,
-                circle: gr.SONGINFO.CIRCLE,
-                duration: gr.SONGTIMES.DURATION,
-                played: gr.SONGTIMES.PLAYED,
-                remaining: gr.SONGTIMES.REMAINING,
-                rating: gr.SONGDATA.RATING,
-                timesrated: gr.SONGDATA.TIMESRATED,
-                circlelink: gr.MISC.CIRCLELINK,
-                circleart: gr.MISC.CIRCLEART,
-                albumart: gr.MISC.ALBUMART,
-                albumurl: `https://gensokyoradio.net/music/album/${gr.SONGDATA.ALBUMID}`
-            },
-			duration = current.duration,
-			xdur = current.played,
+            gr = await fetch(`${conf.url}/gr/live`).then(r => r.json()),
+			duration = gr.duration,
+			xdur = gr.played,
 			durM = (Math.floor(duration / 60)),
 			durS = (duration % 60),
 			xdurM = (Math.floor(xdur / 60)),
@@ -86,18 +68,17 @@ mod.command("now", {
         if(xdurS < 10) xdurS = "0" + xdurS;
 
         let em = app.bot.makeEmbed();
-        em.color(conf.embed_color);
-        em.author("Gensokyo Radio - Music. Games. Touhou");
-        //em.author("Gensokyo Radio - Music. Games. Touhou", "https://gensokyobot.com/_gb/gr.png", conf.web.links.radio);
-        em.title(`${current.artist} - ${current.title} (${current.circle})`);
-        em.url(current.albumurl);
-        if(current.albumart) em.thumbnail(current.arturl + current.albumart);
-        em.field("Title", current.title, true);
-        em.field("Artist", current.artist, true);
-        em.field("Album", current.album, true)
-        em.field('Circle', current.circle, true);
+        em.color(conf.color);
+        em.author("Gensokyo Radio - Music. Games. Touhou")
+        em.title(`${gr.artist} - ${gr.title} (${gr.circle})`);
+        em.url(gr.albumurl);
+        if(gr.albumart) em.thumbnail(gr.arturl + gr.albumart);
+        em.field("Title", gr.title, true);
+        em.field("Artist", gr.artist, true);
+        em.field("Album", gr.album, true)
+        em.field('Circle', gr.circle, true);
         em.field('Duration', xdurM + ":" + xdurS + " / " + durM + ':' + durS, true);
-        em.field('Rating', current.rating + '/5.00', true);
+        em.field('Rating', gr.rating + '/5.00', true);
         em.timestamp();
         em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
         

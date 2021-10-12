@@ -3,9 +3,9 @@
     # File: misc.js
     # Title: A Radio Music Bot
     # Author: SixAiy <me@sixaiy.com>
-    # Version: 0.5a
+    # Version: 5.2
     # Description:
-    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
+    #  A Discord bot for playing the Gensokyo Radio.
     #####################################################################
 
     #####################################################################

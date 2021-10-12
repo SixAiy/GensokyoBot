@@ -3,9 +3,9 @@
     # File: func.js
     # Title: A Radio Music Bot
     # Author: SixAiy <me@sixaiy.com>
-    # Version: 0.5a
+    # Version: 5.2
     # Description:
-    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
+    #  A Discord bot for playing the Gensokyo Radio.
     #####################################################################
 
     #####################################################################
@@ -16,6 +16,9 @@
     ######################################################################
 */
 "use strict"
+let 
+    fetch = require('node-fetch'),
+    conf = require('../conf');
 
 module.exports = async(app) => {
     app.func.getCommand = (app, msg) => {
@@ -112,7 +115,7 @@ module.exports = async(app) => {
         return state;
     };
 
-    // Global Sleep Function for (this/app)
+    // Global Sleep Function
     app.func.Sleep = (x) => {
         let date = Date.now();
         let curDate = null;
@@ -135,4 +138,50 @@ module.exports = async(app) => {
         while(cur.length < len) {cur = c + cur;}
         return cur;
     }
+
+    // Post to API
+    /*
+    app.func.storeStats = (app) => { 
+        let 
+            loadavg = os.loadavg(),
+            totalram = (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
+            usedram = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
+            memory = `Memory: **${usedram} MB / ${totalram} MB`,
+            uptime = app.func.dhm(process.uptime()),
+            shards = app.bot.shards.size,
+            guilds = app.bot.guilds.size,
+            load = [];
+
+        for(let lx of loadavg) {
+            load.push(lx);
+        }
+        let b = {
+            bot: { uptime, memory, load },
+            shard: { shards, guilds, players: 0 }
+        }
+
+        let x = await app.func.postAPI("/gb/status", b);
+        console.log(`[${app.func.timestamp(new Date())}] storeStats:`, x.msg);
+    }; 
+    */
+    app.func.postStats = async(app) => {
+        let 
+            shards = app.bot.shards.size,
+            guilds = app.bot.guilds.size,
+            b = { shards, guilds };
+        let x = await app.func.postAPI('/gb/list', b);
+        console.log(`[${app.func.timestamp(new Date())}] postStats:`, x.msg);
+    };
+    app.func.postAPI = async(loc, data) => {
+        let x = await fetch(`${conf.url}${loc}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": conf.api
+            },
+            body: JSON.stringify(data)
+        }).then(r => r.json());
+        return x
+    }
+
 }
