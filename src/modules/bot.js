@@ -84,12 +84,14 @@ mod.command("stats", {
             loadavg = os.loadavg(),
             totalram = (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
             usedram = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
-            uptime = process.uptime();
+            uptime = process.uptime(),
+            network = await app.func.utrStatus();
                 
                 
         em.author(`${app.bot.user.username} Stats`, app.bot.user.avatarURL);
         em.field('Bot', `Uptime: **${app.func.dhm(uptime)}**\nMemory: **${usedram} MB / ${totalram} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
         em.field("Stats", `On Shard: **${msg.member.guild.shard.id}**\nTotal Shards: **${app.bot.shards.size.toLocaleString()}**\nTotal Guilds: **${app.bot.guilds.size.toLocaleString()}**`, false);
+        em.field("Network", network, false);
         em.timestamp();
         em.color(conf.embed_color);
         em.footer(`Project ${app.bot.user.username}`);

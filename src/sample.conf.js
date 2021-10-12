@@ -47,6 +47,9 @@ module.exports = {
     keyUnregister:          '',
     gr_rating:              '/rating',
 
+    // Uptime Robot API
+    utr_api: "https://api.uptimerobot.com/v2/getMonitors?api_key=*APIKEY*&format=json",
+
     // Listing Services
     list_top: "",
     list_discords: "",
