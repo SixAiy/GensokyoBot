@@ -102,15 +102,14 @@ module.exports = async(app) => {
     // Uptime Robot API
     app.func.utrStatus = async() => {
         let 
-            x = await fetch(conf.utr_api, { method: "POST" }).then(r => r.json()),
+            s = await fetch(`${conf.url}/gb/network`, { method: "POST", headers: { "Content-Type": "application/json", "Authorization": conf.api } }).then(r => r.json()),
             online = "<:online:702753802784210994>",
             offline = "<:dnd:702753779455623229>",
-            state = "",
-            s = x.monitors;
+            state = "";
 
         for(let m of s) {
-            if(m.status == 2) state += `${online} ${m.friendly_name}\n`;
-            else state += `${offline} ${m.friendly_name}\n`;
+            if(m.status == 2) state += `${online} ${m.name}\n`;
+            else state += `${offline} ${m.name}\n`;
         }
         return state;
     };
