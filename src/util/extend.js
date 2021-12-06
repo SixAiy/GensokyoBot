@@ -1,11 +1,11 @@
 /*
     #####################################################################
-    # File: extend.js
+    # File: extendEris.js
     # Title: A Radio Music Bot
     # Author: SixAiy <me@sixaiy.com>
-    # Version: 5.2
+    # Version: 0.5a
     # Description:
-    #  A Discord bot for playing the Gensokyo Radio.
+    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
     #####################################################################
 
     #####################################################################
@@ -246,7 +246,7 @@ module.exports = (Eris, options = {}) => {
 
     Eris.Client.prototype.getAllTextChannelsAsCount = function() {
         let n = 0;
-        const client = this ? this.shard.client : this._client;
+        const client = this ? this.shard.client : this;
         client.guilds.map(m => {
             m.channels.map(ch => {
                 if (ch.type == 0) {
@@ -258,7 +258,7 @@ module.exports = (Eris, options = {}) => {
     }
     Eris.Client.prototype.getAllVoiceChannelsAsCount = function() {
         let n = 0;
-        const client = this ? this.shard.client : this._client;
+        const client = this ? this.shard.client : this;
         client.guilds.map(m => {
             m.channels.map(ch => {
                 if (ch.type == 2) {
@@ -266,6 +266,18 @@ module.exports = (Eris, options = {}) => {
                 }
             })
         })
+        return n;
+    }
+    Eris.Client.prototype.getAllPlayingChannelsCount = function() {
+        let n = 0;
+        const client = this ? this.shard.client : this._client;
+        client.guilds.map(m => {
+            m.channels.map(c => {
+                if(c.type == 2 && c.members.includes(client.user.id)) {
+                    n++;
+                }
+            });
+        });
         return n;
     }
     Eris.Channel.prototype.createEmbed = function(embed) {

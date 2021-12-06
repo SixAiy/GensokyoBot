@@ -17,11 +17,11 @@
 /*
     #####################################################################
     # File: mod.js
-    # Title: A Radio Music Bot
+    # Title: command handler for interations and msg
     # Author: SixAiy <me@sixaiy.com>
-    # Version: 5.2
+    # Version: 0.5a
     # Description:
-    #  A Discord bot for playing the Gensokyo Radio.
+    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
     #####################################################################
 
     #####################################################################

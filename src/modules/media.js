@@ -3,9 +3,9 @@
     # File: media.js
     # Title: A Radio Music Bot
     # Author: SixAiy <me@sixaiy.com>
-    # Version: 5.2
+    # Version: 0.5a
     # Description:
-    #  A Discord bot for playing the Gensokyo Radio.
+    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
     #####################################################################
 
     #####################################################################
@@ -36,18 +36,22 @@ mod.command("play", {
         if(!vc) return msg.createMessage("You need to be in a voice channel");
 
         let 
-            gr = await fetch(`${conf.url}/gr/live`).then(r => r.json()),
+            live = await fetch(`${conf.url}/gr/live`).then(r => r.json()),
             vcn = msg.member.guild.channels.get(vc).name;
 
         await msg.defer();
-        app.bot.joinVoiceChannel(vc).then(async(p) => {
-            if(p.playing) return msg.createMessage(`Already Playing in **${vcn}**`);
+        app.bot.joinVoiceChannel(vc)
+            .then(async(p) => {
+                if(p.playing) return msg.createMessage(`Already Playing in **${vcn}**`);
 
-			p.play(`${conf.stream}`, { inlineVolume: true });
-			p.setVolume(50 / 100);
+                p.play(`${conf.stream}`, { inlineVolume: true });
+                p.setVolume(50 / 100);
 
-            msg.createMessage(`Now playing **${gr.artist} - ${gr.title}** in **${vcn}**`);
-        }).catch((e) => console.log(e.stack));
+                p.on("error", (e) => console.log(e));
+
+                msg.createMessage(`Now playing **${live.artist} - ${live.title}** in **${vcn}**`);
+            })
+            .catch((e) => console.log(e.stack));
     }
 });
 
@@ -56,9 +60,9 @@ mod.command("now", {
     rank: 0,
     func: async function(app, msg, args, rank) {
         let 
-            gr = await fetch(`${conf.url}/gr/live`).then(r => r.json()),
-			duration = gr.duration,
-			xdur = gr.played,
+        live = await fetch(`${conf.url}/gr/live`).then(r => r.json()),
+			duration = live.duration,
+			xdur = live.played,
 			durM = (Math.floor(duration / 60)),
 			durS = (duration % 60),
 			xdurM = (Math.floor(xdur / 60)),
@@ -70,15 +74,15 @@ mod.command("now", {
         let em = app.bot.makeEmbed();
         em.color(conf.color);
         em.author("Gensokyo Radio - Music. Games. Touhou")
-        em.title(`${gr.artist} - ${gr.title} (${gr.circle})`);
-        em.url(gr.albumurl);
-        if(gr.albumart) em.thumbnail(gr.arturl + gr.albumart);
-        em.field("Title", gr.title, true);
-        em.field("Artist", gr.artist, true);
-        em.field("Album", gr.album, true)
-        em.field('Circle', gr.circle, true);
+        em.title(`${live.artist} - ${live.title} (${live.circle})`);
+        em.url(live.albumurl);
+        if(live.albumart) em.thumbnail(live.arturl + live.albumart);
+        em.field("Title", live.title, true);
+        em.field("Artist", live.artist, true);
+        em.field("Album", live.album, true)
+        em.field('Circle', live.circle, true);
         em.field('Duration', xdurM + ":" + xdurS + " / " + durM + ':' + durS, true);
-        em.field('Rating', gr.rating + '/5.00', true);
+        em.field('Rating', live.rating + '/5.00', true);
         em.timestamp();
         em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
         

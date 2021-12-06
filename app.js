@@ -28,25 +28,21 @@ let
 
 
 require('./src/util/extend')(Eris);
-require('./src/util/func')(app);
+require('./src/util/core')(app);
+require('./src/util/event')(app);
 
 console.clear();
+console.log("\n\n" +
+" _____                      _               ______       _   \n" +
+"|  __ \\                    | |              | ___ \\     | |  \n" +
+"| |  \\/ ___ _ __  ___  ___ | | ___   _  ___ | |_/ / ___ | |_ \n" +
+"| | __ / _ \\ '_ \\/ __|/ _ \\| |/ / | | |/ _ \\| ___ \\/ _ \\| __|\n" +
+"| |_\\ \\  __/ | | \\__ \\ (_) |   <| |_| | (_) | |_/ / (_) | |_ \n" +
+" \\____/\\___|_| |_|___/\\___/|_|\\_\\\\__, |\\___/\\____/ \\___/ \\__|\n" +
+"                                  __/ |                      \n" +
+"                                 |___/                       " + "\n\n");
 console.log(`[${app.func.timestamp(new Date())}] Bot:`, "Startup");
 
 app.modman.LoadPlugins();
 app._plugins = app.modman.pluginslist;
 app.bot.connect();
-
-app.bot.on("error", (e) => console.log(e.stack)); 
-app.bot.on("interactionCreate", (msg) => app.func.getCommand(app, msg));
-app.bot.on("shardReady", (x) => console.log(`[${app.func.timestamp(new Date())}] Bot:`, `Shard ${x} Ready`));
-app.bot.on("shardDisconnect", (x) => console.log(`[${app.func.timestamp(new Date())}] Bot:`, `Shard ${x} Disconnected`));
-app.bot.on("ready", () => {
-    app.bot.editStatus(conf.state, conf.option);
-    console.log(`[${app.func.timestamp(new Date())}] Bot:`, "Connected");
-    app.func.interactionCommands(app);
-    app.func.postStats(app);
-    require('./src/util/wss')(app);
-});
-
-setTimeout(() => { app.func.postStats(app) }, 3.6e+6 /* 1hr */);

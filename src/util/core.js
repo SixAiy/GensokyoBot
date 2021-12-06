@@ -3,9 +3,9 @@
     # File: func.js
     # Title: A Radio Music Bot
     # Author: SixAiy <me@sixaiy.com>
-    # Version: 5.2
+    # Version: 0.5a
     # Description:
-    #  A Discord bot for playing the Gensokyo Radio.
+    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
     #####################################################################
 
     #####################################################################
@@ -18,11 +18,21 @@
 "use strict"
 let 
     fetch = require('node-fetch'),
-    conf = require('../conf');
+    conf = require('../conf'),
+    guilds = ["896971353490604063", "174820236481134592"],
+    channels = ["896971354170085388", "174821093633294338"];
 
 module.exports = async(app) => {
     app.func.getCommand = (app, msg) => {
         if(!msg.token) return;
+        if(guilds.includes(msg.channel.guild.id)) {
+            if(!channels.includes(msg.channel.id)) return;
+            app.func.pushcmd(app, msg);
+        }
+        
+        app.func.pushcmd(app, msg);
+    }
+    app.func.pushcmd = (app, msg) => {
         msg.pingstamp = new Date() / 1000;
         msg.content = msg.data.name;
 
@@ -37,6 +47,11 @@ module.exports = async(app) => {
             }
         }
     }
+
+    // Save Fav Song
+    app.func.FavSong = (user, song) => {
+        
+    };
 
     // Main Functions
     app.func.dhm = (time) => {
@@ -139,40 +154,57 @@ module.exports = async(app) => {
     }
 
     // Post to API
-    /*
-    app.func.storeStats = (app) => { 
-        let 
-            loadavg = os.loadavg(),
-            totalram = (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
-            usedram = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
-            memory = `Memory: **${usedram} MB / ${totalram} MB`,
-            uptime = app.func.dhm(process.uptime()),
-            shards = app.bot.shards.size,
-            guilds = app.bot.guilds.size,
-            load = [];
-
-        for(let lx of loadavg) {
-            load.push(lx);
-        }
-        let b = {
-            bot: { uptime, memory, load },
-            shard: { shards, guilds, players: 0 }
-        }
-
-        let x = await app.func.postAPI("/gb/status", b);
-        console.log(`[${app.func.timestamp(new Date())}] storeStats:`, x.msg);
-    }; 
-    */
     app.func.postStats = async(app) => {
         let 
+            botid = app.bot.user.id,
             shards = app.bot.shards.size,
             guilds = app.bot.guilds.size,
-            b = { shards, guilds };
-        let x = await app.func.postAPI('/gb/list', b);
-        console.log(`[${app.func.timestamp(new Date())}] postStats:`, x.msg);
+            b = { botid, shards, guilds },
+            x = await fetch(`${conf.url}/gb/list`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": conf.api
+                },
+                body: JSON.stringify(b)
+            }).then(r => r.json());
+        console.log(`[${app.func.timestamp(new Date())}] postStats:`, Object.keys(x.data));
     };
-    app.func.postAPI = async(loc, data) => {
-        let x = await fetch(`${conf.url}${loc}`, {
+    app.func.postAPI = async(app) => {
+        let 
+            os = require('os'),
+            id = app.bot.user.id,
+            shards = app.bot.shards.size,
+            guilds = app.bot.guilds.size,
+            players = app.func.getAllPlayers(app),
+            load = os.loadavg(),
+            totalram = (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
+            usedram = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
+            freeram = ((process.memoryUsage()['rss'] - process.memoryUsage()['heapUsed']) / 1024 / 1024).toFixed(2),
+            uptime = process.uptime(),
+            data = {
+                id,
+                shards,
+                guilds,
+                players,
+                load: { one: load[0].toFixed(3), two: load[1].toFixed(3), three: load[2].toFixed(3) },
+                totalram,
+                usedram,
+                freeram,
+                uptime
+            },      
+            x = await fetch(`${conf.url}/gb/stats`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": conf.api
+                },
+                body: JSON.stringify(data)
+            }).then(r => r.json());
+        console.log(`[${app.func.timestamp(new Date())}] storeStats:`, Object.keys(x.data));
+    }
+    app.func.storeVoiceUsers = async(data) => {
+        let x = await fetch(`${conf.url}/gb/voice`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -180,7 +212,103 @@ module.exports = async(app) => {
             },
             body: JSON.stringify(data)
         }).then(r => r.json());
-        return x
+        console.log(`[${app.func.timestamp(new Date())}] ${data.type}:`, x.data);
     }
 
+    // VC Stuff
+    app.func.getAllPlayers = (app) => {
+        let n = 0;
+        app.bot.guilds.map(g => {
+            g.channels.map(c => {
+                if(c.type == 2 && c.voiceMembers.has(app.bot.user.id)) {
+                    n++;
+                }
+            });
+        });
+        return n;
+    };
+
+    // Generate Code Block for Eval
+    app.func.generateCodeblock = (text) => {
+        return `\`\`\`js\n${text}\n\`\`\``;
+    };
+
+    // messageCreate Handler - These are GensokyoBot's Core Commands (Move to console later)
+    app.func.messageCreate = (app, msg) => {
+        
+        if(msg.author.bot) return;
+        let usr = ["188571987835092992", "112615849566744576"];
+        if(!usr.includes(msg.author.id)) return;
+        let
+            body = msg.content.slice("!".length).split(" "),
+            cmd = body[0],
+            args = body.slice(1).join(" ");
+        if(cmd == "e") {
+            let 
+                util            = require('util'),
+                redCol          = 0xF44336,
+                greenCol        = 0x8BC34A;
+            try {
+                let
+                    returned = eval(args),
+                    str = util.inspect(returned, {depth: 1}),
+                    embed = {
+                        title: "evaluation Results",
+                        color: greenCol,
+                        fields: [
+                            { name: "Input", value: app.func.generateCodeblock(args) },
+                            { name: "Output", value: app.func.generateCodeblock(str) }
+                        ]
+                    };
+                msg.channel.createMessage( { embeds: [embed] });
+            } catch(e) {
+                msg.channel.createMessage({
+                    embeds: [{
+                        title: "Evaluation Results",
+                        color: redCol,
+                        fields: [
+                            { name: "Input", value: app.func.generateCodeblock(args) },
+                            { name: "Output", value: app.func.generateCodeblock(e) }
+                        ]
+                    }]
+                });
+            }
+        }
+        if(cmd == "r") {
+            let state = app.modman.reload(args);
+            if(state) {
+                msg.channel.createMessage(`${args} Rloaded ^^`);
+            } else {
+                let em = bot.makeEmbed();
+                em.description("0.0 WHAT ARE YOU PLAYING AT REEEEE D:<");
+                em.image('https://media1.tenor.com/images/a715f8f49a7ca5cfa04bb4eb2899552e/tenor.gif');;
+                msg.channel.createEmbed(em);
+            }
+        }
+        if(cmd == "revive") {
+
+        }
+    };
+
+    // Status Handler
+    app.func.setStatus = (app) => {
+        
+    };
+
+    // Event Handler
+    app.func.eventHandle = (event) => {
+        app.bot.createMessage(conf.logs, event)
+    };
+
+    // Error Handler
+
+
+    // Timeouts
+    if(!conf.dev) { 
+        // Post
+        setTimeout(() => { 
+            app.func.postStats(app); 
+            app.func.postAPI(app); 
+        }, 3.6e+6 /* 1hr */);
+    }
 }
