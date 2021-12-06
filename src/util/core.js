@@ -18,6 +18,7 @@
 "use strict"
 let 
     fetch = require('node-fetch'),
+    { Webhook, MessageBuilder } = require('discord-webhook-node'),
     conf = require('../conf'),
     guilds = ["896971353490604063", "174820236481134592"],
     channels = ["896971354170085388", "174821093633294338"];
@@ -290,14 +291,23 @@ module.exports = async(app) => {
         }
     };
 
-    // Status Handler
-    app.func.setStatus = (app) => {
-        
-    };
-
     // Event Handler
     app.func.eventHandle = (event) => {
         app.bot.createMessage(conf.logs, event)
+    };
+
+    // Log Hanlder
+    app.func.logHandle = (title, desc, webhook) => {
+        let 
+            hook = new Webhook(webhook),
+            em = new MessageBuilder();
+
+        em.setColor(conf.color);
+        em.setAuthor(title);
+        em.setDescription(`${desc}`);
+        em.timestamp();
+        em.setFooter(`${title} ${conf.version}`);
+        hook.send(em);
     };
 
     // Error Handler

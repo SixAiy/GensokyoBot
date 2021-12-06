@@ -27,11 +27,13 @@ module.exports = (app) => {
     // Guild Events
     app.bot.on("guildCreate", (g) => {
         if(g.name == undefined || g.id == undefined) return;
-        app.func.eventHandle(`<:join:877006355746136064> **${g.name}** (**${g.id}**)`)
+        let desc = `<:join:877006355746136064> Enter\n\nGuild Name: ${g.name}\nGuild ID: ${g.id}`;
+        app.func.logHandle("Guild Update", desc, conf.log.guild);
     });
     app.bot.on("guildDelete", (g) => {
         if(g.name == undefined || g.id == undefined) return;
-        app.func.eventHandle(`<:leave:877006244794220585> **${g.name}** (**${g.id}**)`)
+        let desc = `<:leave:877006244794220585> Exit\n\nGuild Name: ${g.name}\nGuild ID: ${g.id}`;
+        app.func.logHandle("Guild Update", desc, conf.log.guild);
     });
 
     app.bot.on("messageReactionAdd", (msg, emoji, member) => {
