@@ -1,42 +1,26 @@
-/*
-#####################################################################
-# File: man.js
-# Title: A simple file manager
-# Author: sorch/theholder <sorch@protonmail.ch>
-# Version: 2020.p1
-#####################################################################
+"use strict"
 
-#####################################################################
-# License
-#####################################################################
-# Copyright 2020 Contributing Authors
-# This program is distributed under the terms of the GNU GPL.
-######################################################################
-*/
-
-var fs = require("fs");
-var resolve = require('resolve');
-var _ = require("underscore");
+let 
+	fs = require("fs"),
+	resolve = require('resolve'),
+	_ = require("underscore");
 
 function ModuleManager(path) {
-	this.pluginslist = {};
+	this.moduleslist = {};
 	this.pathBFU = path
 };
-ModuleManager.prototype.LoadPlugins = function() {
-	var self = this;
+ModuleManager.prototype.LoadModules = function() {
+	let self = this;
 	var pluginsDir = fs.readdirSync(self.pathBFU);
     pluginsDir.forEach(function (file) {
-        self.pluginslist[file] = require(self.pathBFU + file);
+        self.moduleslist[file] = require(self.pathBFU + file);
 	});
-};
-ModuleManager.prototype.pl = function() {
-	return this.pluginslist;
 };
 ModuleManager.prototype.load = function(mod) {
 	var mod = mod.replace(/\.js$/i, "");
 	var mod = mod + ".js";
     if (fs.existsSync(this.pathBFU + mod)) {
-        this.pluginslist[mod] = require(this.pathBFU + mod);
+        this.moduleslist[mod] = require(this.pathBFU + mod);
 		return true;
 	} else {
 		return false;
@@ -58,8 +42,8 @@ ModuleManager.prototype.reload = function(mod) {
 ModuleManager.prototype.unload = function(mod) {
 	var mod = mod.replace(/\.js$/i, "");
 	var mod = mod + ".js";
-	if(this.pluginslist.hasOwnProperty(mod)) {
-		delete this.pluginslist[mod];
+	if(this.moduleslist.hasOwnProperty(mod)) {
+		delete this.moduleslist[mod];
 		return true;
 	}
 	else {
@@ -67,14 +51,14 @@ ModuleManager.prototype.unload = function(mod) {
 	}
 };
 ModuleManager.prototype.isLoaded = function(mod) {
-	if(this.pluginslist.hasOwnProperty(mod)) {
+	if(this.moduleslist.hasOwnProperty(mod)) {
 		return true;
 	}
 	else {
 		return false;
 	}
 };
-ModuleManager.prototype.getPlugins = function() {
-	return _.keys(this.pluginslist);
+ModuleManager.prototype.getModules = function() {
+	return _.keys(this.moduleslist);
 };
 exports.ModuleManager = ModuleManager;

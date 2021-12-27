@@ -19,11 +19,17 @@
   "dependencies": {
     "console": "^0.7.2",
     "cors": "^2.8.5",
-    "eris": "github:DonovanDMC/eris#everything",
+    "eris": "^0.16.1",
     "express": "^4.17.1",
+    "figlet": "^1.5.2",
+    "flat-file-db": "^1.0.0",
     "fs": "^0.0.1-security",
+    "humanize": "0.0.9",
+    "moment": "^2.29.1",
+    "mongoose": "^6.1.2",
     "node-fetch": "^2.6.1",
     "resolve": "^1.20.0",
-    "underscore": "^1.13.1"
+    "underscore": "^1.13.1",
+    "unique-names-generator": "^4.6.0"
   }
 }

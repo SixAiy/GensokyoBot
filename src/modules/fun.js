@@ -1,34 +1,10 @@
-/*
-    #####################################################################
-    # File: misc.js
-    # Title: A Radio Music Bot
-    # Author: SixAiy <me@sixaiy.com>
-    # Version: 0.5a
-    # Description:
-    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
-    #####################################################################
-
-    #####################################################################
-    # License
-    #####################################################################
-    # Copyright 2021 Contributing Authors
-    # This program is distributed under the terms of the GNU GPL.
-    ######################################################################
-*/
-
 "use strict"
 
-let 
-    mod = require('../util/mod').Module("misc"),
-    conf = require('../conf');
+let mod = require('../util/mod').Module("misc");
 
-
-// FUN COMMANDS
 mod.command("stab", {
-    interaction: true,
     desc: "Shows a anime gif of stabbing",
-    rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(app, msg, args) {
         let 
             imgs = [
                 'https://i.imgur.com/VjggulR.gif',
@@ -43,17 +19,17 @@ mod.command("stab", {
             img = imgs[rand],
             em = app.bot.makeEmbed();
 
-        em.color(conf.embed_color);
+        em.color(app.conf.color);
         em.image(img);
+        em.timestamp();
+        em.footer(`Project ${app.bot.user.username} v${app.conf.version} | Environment: ${app.conf.env}`);
 
-        msg.createEmbed(em);
+        app.core.createEmbed(msg, em);
     }
 });
 mod.command("facedesk", {
-    interaction: true,
     desc: "Gif of Anime facedesking",
-    rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(app, msg, args) {
         let 
             imgs = [
                 "https://i.imgur.com/csdvorU.gif",
@@ -73,17 +49,17 @@ mod.command("facedesk", {
             img = imgs[rand],
             em = app.bot.makeEmbed();
 
-        em.color(conf.embed_color);
+        em.color(app.conf.color);
         em.image(img);
+        em.timestamp();
+        em.footer(`Project ${app.bot.user.username} v${app.conf.version} | Environment: ${app.conf.env}`);
 
-        msg.createEmbed(em);
+        app.core.createEmbed(msg, em);
     }
 });
 mod.command("hug", {
-    interaction: true,
     desc: "You can hug someone",
-    rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(app, msg, args) {
         let 
             imgs = [
                 "https://i.imgur.com/JrnxI9M.gif",
@@ -110,17 +86,17 @@ mod.command("hug", {
             img = imgs[rand],
             em = app.bot.makeEmbed();
 
-        em.color(conf.embed_color);
+        em.color(app.conf.color);
         em.image(img);
+        em.timestamp();
+        em.footer(`Project ${app.bot.user.username} v${app.conf.version} | Environment: ${app.conf.env}`);
 
-        msg.createEmbed(em);
+        app.core.createEmbed(msg, em);
     }
 })
 mod.command("pat", {
-    interaction: true,
     desc: "Pat someone",
-    rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(app, msg, args) {
         let 
             imgs = [
                 'https://i.imgur.com/Iye3UIa.png',
@@ -173,17 +149,17 @@ mod.command("pat", {
             img = imgs[rand],
             em = app.bot.makeEmbed();
 
-        em.color(conf.embed_color);
+        em.color(app.conf.color);
         em.image(img);
+        em.timestamp();
+        em.footer(`Project ${app.bot.user.username} v${app.conf.version} | Environment: ${app.conf.env}`);
 
-        msg.createEmbed(em);
+        app.core.createEmbed(msg, em);
     }
 });
 mod.command("roll", {
-    interaction: true,
     desc: "You roll around",
-    rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(app, msg, args) {
         let
             imgs = [
                 'https://i.imgur.com/7sLGFSl.gif',
@@ -225,23 +201,25 @@ mod.command("roll", {
             img = imgs[rand],
             em = app.bot.makeEmbed();
 
-        em.color(conf.embed_color);
+        em.color(app.conf.color);
         em.image(img);
+        em.timestamp();
+        em.footer(`Project ${app.bot.user.username} v${app.conf.version} | Environment: ${app.conf.env}`);
 
-        msg.createEmbed(em);
+        app.core.createEmbed(msg, em);
     }
 });
 mod.command("anime", {
-    interaction: true,
     desc: "shows a gif of Animeeee!!",
-    rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(app, msg, args) {
         let em = app.bot.makeEmbed();
 
-        em.color(conf.embed_color);
+        em.color(app.conf.color);
         em.image("http://i.imgur.com/93VahIh.png");
+        em.timestamp();
+        em.footer(`Project ${app.bot.user.username} v${app.conf.version} | Environment: ${app.conf.env}`);
 
-        msg.createEmbed(em);
+        app.core.createEmbed(msg, em);
     }
 });
 

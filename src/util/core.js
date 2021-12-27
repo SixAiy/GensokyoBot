@@ -1,324 +1,403 @@
-/*
-    #####################################################################
-    # File: func.js
-    # Title: A Radio Music Bot
-    # Author: SixAiy <me@sixaiy.com>
-    # Version: 0.5a
-    # Description:
-    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
-    #####################################################################
-
-    #####################################################################
-    # License
-    #####################################################################
-    # Copyright 2021 Contributing Authors
-    # This program is distributed under the terms of the GNU GPL.
-    ######################################################################
-*/
 "use strict"
+
 let 
-    fetch = require('node-fetch'),
-    { Webhook, MessageBuilder } = require('discord-webhook-node'),
-    conf = require('../conf'),
-    guilds = ["896971353490604063", "174820236481134592"],
-    channels = ["896971354170085388", "174821093633294338"];
+    flatfile = require('flat-file-db'),
+    shardsDB = flatfile(`${process.cwd()}/src/db/shards.db`);
 
-module.exports = async(app) => {
-    app.func.getCommand = (app, msg) => {
-        if(!msg.token) return;
-        if(guilds.includes(msg.channel.guild.id)) {
-            if(!channels.includes(msg.channel.id)) return;
-            app.func.pushcmd(app, msg);
-        }
-        
-        app.func.pushcmd(app, msg);
-    }
-    app.func.pushcmd = (app, msg) => {
-        msg.pingstamp = new Date() / 1000;
-        msg.content = msg.data.name;
+module.exports = (app) => {
 
-        let res = undefined;
-        for(let plugin in app._plugins) {
-            let r = app._plugins[plugin].mod.getCommand(msg);
-            if(r !== undefined) {
-                res = r;
-                app.func.interactionCommands(app);
-                let args = res.res.args || "";
-                res.cmd.func(app, msg, args, /*sys*/);
-            }
-        }
-    }
-
-    // Save Fav Song
-    app.func.FavSong = (user, song) => {
-        
+    /* Global */
+    app.core.figlet = async(title) => { 
+        require('figlet')(title, (e, r) => { 
+            if(e) return console.log(e); 
+            console.log(r); 
+        }); 
+    };
+    app.core.log = async(title, subtitle) => { 
+        console.log(`[${timestamp()}] ${title}:`, subtitle); 
+    };
+    app.core.humanize = async(time) => { 
+        return require('moment').duration(time, 'milliseconds').format('lll'); 
+    };
+    app.core.randomName = async() => {
+        let 
+            { uniqueNamesGenerator, names } = require('unique-names-generator'),
+            name = uniqueNamesGenerator({ dictionaries: [names] });
+        return name;
+    };
+    app.core.getRemote = async(url) => {
+        let data;
+        await require('node-fetch')(url)
+            .then((r) => r.json())
+            .then((d) => { data = { error: false, data: d } })
+            .then((e) => { data = { error: true, data: e } });
+        return data;
+    };
+    app.core.postRemote = async(url, token, body) => {
+        let data;
+        await require('node-fetch')(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": token },
+            body
+        })
+            .then((r) => r.json())
+            .then((d) => { data = { error: false, data: d } })
+            .then((e) => { data = { error: true, data: e } });
+        return data;
+    };
+    app.core.sleep = async(time) => {
+        await sleep(time);
     };
 
-    // Main Functions
-    app.func.dhm = (time) => {
-        let 
-            date = new Date(time * 1000),
-            months = date.getUTCMonth(),
-            days = date.getUTCDate - 1,
-            hours = date.getUTCHours(),
-            minutes = date.getUTCMinutes(),
-            seconds = date.getUTCSeconds(),
-            segments = [];
-            
-        if(months > 0) segments.push(months + " mo" + ((months == 1) ? "" : "s"));
-        if(days > 0) segments.push(days + ' d' + ((days == 1) ? '' : 's'));
-        if(hours > 0) segments.push(hours + ' hr' + ((hours == 1) ? '' : 's'));
-        if(minutes > 0) segments.push(minutes + ' min' + ((minutes == 1) ? '' : 's'));
-        if(seconds > 0) segments.push(seconds + ' sec' + ((seconds == 1) ? '' : 's'));
-
-        return segments.join(', ');
-    }
-    app.func.helpEmbed = (msg, content, components) => /*console.log({embeds: [content], components: [{type: 1, components: components}]});*/ msg.createMessage({embeds: [content], components: [{type: 1, components: components}]});
-
-    // interaction Commands Register
-    app.func.interactionCommands = async(app) => {
-        const intercmds = await app.bot.getCommands(); // pulls the interaction commands to see if they are listed!
-        const mods = app.modman.getPlugins();
-
-        mods.map(async(module) => {
-            const data = app._plugins[module].mod.getAllCommands();
-            data.map(async(c) => {
-                if(intercmds.length < 1) {
-                    if(!c.interaction || c.name == "bot") return;
-                    app.bot.createCommand({
-                        name: c.name,
-                        description: c.desc,
-                        options: [],
-                        type: 1
-                    });
-                    // sleep for 5 seconds so we dont slam discords api
-                    app.func.Sleep(5000);
-                }
-
-                // Interaction Check so we dont re-register - better safe then sorry.
-                for(let intercmd of intercmds) {
-                    // Check if each command is registered if not registered it will register that command
-                    if(intercmd.name != c.name && intercmd.application_id != app.bot.user.id) {
-                        // if the interaction is false it wont register the command - still partly buggy
-                        app.bot.createCommand({
-                            name: c.name,
-                            description: c.desc,
-                            options: [],
-                            type: 1
-                        });
-                        // sleep for 5 seconds so we dont slam discords api
-                        app.func.Sleep(5000);
+    /* Bot */
+    app.core.bot = async() => {
+        app.bot.connect();
+        app.bot.on("error", (e) => app.core.log("error", e.stack));
+        app.bot.on("ready", () => { 
+            if(app.conf.firstRegister) app.core.iCommands(); 
+            buildShards(app);
+            app.core.log("Ready", "Discord"); 
+            app.core.status("online", "in Developement");
+        });
+        app.bot.on("shardReady", (x) => app.core.log("Shard", `${x} Ready`));
+        app.bot.on("shardDisconnect", (e, x) => app.core.log("Shard", `${x} Disconnected`));
+        app.bot.on("interactionCreate", (msg) => app.core.gCommand(msg));
+        app.bot.on("messageCreate", (msg) => {
+            let prefix = "ur";
+            if(msg.author.bot || msg.author.id != "188571987835092992" || msg.content.indexOf(prefix) !== 0) return;
+            let 
+                body = msg.content.slice(prefix.length).split(" "),
+                cmd = body[0],
+                args = body.slice(1).join(" ");
+            if(cmd == "e") {
+                try {
+                    let
+                        returned = eval(args),
+                        str = require('util').inspect(returned, {depth: 1}),
+                        embed = {
+                            title: "evaluation Results",
+                            color: 0x8BC34A,
+                            fields: [
+                                { name: "Input", value: `\`\`\`js\n${args}\`\`\`` },
+                                { name: "Output", value: `\`\`\`js\n${str}\`\`\`` }
+                            ]
+                        };
+                    msg.channel.createMessage({ embeds: [embed] });
+                } catch(e) {
+                    let embed = {
+                        title: "Evaluation Results",
+                        color: 0xF44336,
+                        fields: [
+                            { name: "Input", value: `\`\`\`js\n${args}\`\`\`` },
+                            { name: "Output", value: `\`\`\`js\n${e}\`\`\`` }
+                        ]
+                    };
+                    msg.channel.createMessage({ embeds: [embed] });
+                };
+            };
+        });
+    };
+    app.core.createMD = (msg, time, content) => {
+        let msgid = 0;
+        msg.createMessage(content)
+            .then(() => {
+                msg.channel.messages.map((m) => {
+                    if(m.author.id == app.bot.user.id && m.author.bot && m.interaction.user.id == msg.member.id) {
+                        msgid = m.id;
+                    }   
+                });
+                sleep(time);
+                msg.deleteMessage(msgid);
+            });
+    };
+    app.core.createMU = (msg, time, content) => {
+        let msgid = 0;
+        msg.createMessage(content)
+            .then(() => {
+                msg.channel.messages.map((m) => {
+                    if(m.author.id == app.bot.user.id && m.author.bot && m.interaction.user.id == msg.member.id) {
+                        msgid = m.id
                     }
-                    return;
-                }
+                });
+
+            });
+    };
+    app.core.stats = async() => { 
+        return botStats(app); 
+    };
+    app.core.ModuleHandler = async(type, mod) => {
+        if(type == "rl") {
+            let state = app.modman.reload(mod);
+            if(state) return `**${mod}** Reloaded`;
+            return `Failed to reload **${mod}**`;
+        };
+        if(type == "l") {
+            let state = app.modman.load(mod);
+            if(state) return `${mod} Enabled ^^`;
+            return `Failed to enable **${mod}**`;
+        };
+        if(type == "ul") {
+            let state = app.modman.unload(mod);
+            if(state) return `**${mod}** Disabled`;
+            return `Failed to disable **${mod}**`;
+        };
+    };
+    app.core.status = async(state, details) => {
+        app.bot.editStatus(state, { name: details, type: 0 });
+    };
+    app.core.gCommand = async(msg) => {
+        if(!msg.token) return
+        if(app.conf.reGuilds.includes(msg.guildID) && app.conf.reChannels.includes(msg.channel.id)) return restrictedGuildRepsonse(app, msg);
+        for(let x in app._modules) {
+            let res = app._modules[x].mod.getCommand(msg);
+            if(res != undefined) {
+                res.cmd.func(app, msg, res.res.args || "");
+            };
+        };
+    };
+    app.core.aCommands = async() => {
+        let 
+            mods = app.modman.getModules(),
+            cmdx = [];
+        mods.map((mod) => {
+            let cmds = app._modules[mod].mod.getAllCommands();
+            cmds.map((cmd) => {
+                cmdx.push(cmd);
             });
         });
-    }
-
-    // Uptime Robot API
-    app.func.utrStatus = async() => {
-        let 
-            s = await fetch(`${conf.url}/gb/network`, { method: "POST", headers: { "Content-Type": "application/json", "Authorization": conf.api } }).then(r => r.json()),
-            online = "<:online:702753802784210994>",
-            offline = "<:dnd:702753779455623229>",
-            state = "";
-
-        for(let m of s) {
-            if(m.status == 2) state += `${online} ${m.name}\n`;
-            else state += `${offline} ${m.name}\n`;
-        }
-        return state;
+        return cmdx;
     };
-
-    // Global Sleep Function
-    app.func.Sleep = (x) => {
-        let date = Date.now();
-        let curDate = null;
-        do { 
-            curDate = Date.now(); 
-        } while(curDate - date < x);
-    }
-
-    // Console Timestamp
-    app.func.timestamp = (d) => {
-        return d.getFullYear() + "-" +
-            pad(d.getMonth() + 1, 2, "0") + "-" +
-            pad(d.getDate(), 2, "0") + " " +
-            pad(d.getHours(), 2, "0") + ":" +
-            pad(d.getMinutes(), 2, "0") + ":" +
-            pad(d.getSeconds(), 2, "0");
-    }
-    function pad(s, len, c) {
-        var cur = s.toString();
-        while(cur.length < len) {cur = c + cur;}
-        return cur;
-    }
-
-    // Post to API
-    app.func.postStats = async(app) => {
+    app.core.iCommands = async() => {
         let 
-            botid = app.bot.user.id,
-            shards = app.bot.shards.size,
-            guilds = app.bot.guilds.size,
-            b = { botid, shards, guilds },
-            x = await fetch(`${conf.url}/gb/list`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": conf.api
-                },
-                body: JSON.stringify(b)
-            }).then(r => r.json());
-        console.log(`[${app.func.timestamp(new Date())}] postStats:`, Object.keys(x.data));
+            mods = app.modman.getModules(),
+            dcmds = await app.bot.getCommands();    
+        
+        for(let mod of mods) {
+            let cmds = app._modules[mod].mod.getAllCommands();
+            for(let cmd of cmds) {
+                if(cmd.masterGuild) {
+                    let mcmds = await app.bot.getGuildCommands(app.conf.mguild);
+                    if(!mcmds.length) { 
+                        console.log("createGuildCommand:", cmd.name);
+                        app.bot.createGuildCommand(app.conf.mguild, {
+                            name: cmd.name,
+                            description: cmd.desc,
+                            options: cmd.options,
+                            type: 1
+                        });
+                        sleep(5000);
+                    };
+                    for(let mcmd of mcmds) {
+                        console.log(mcmd);
+                        if(mcmd.name != cmd.name || mcmd.options != cmd.options || mcmd.description != cmd.desc || mcmd.type != cmd.type) {
+                            console.log("editGuildCommand:", cmd.name);
+                            app.bot.editGuildCommand(app.conf.mguild, mcmd.id, {
+                                name: cmd.name,
+                                description: cmd.desc,
+                                options: cmd.options,
+                                type: 1
+                            });
+                            sleep(5000);
+                        }
+                    }
+                }
+                /*
+                if(!dcmds.length) { 
+                    console.log("createCommand:", cmd.name);
+                    app.bot.createCommand({
+                        name: cmd.name,
+                        description: cmd.desc,
+                        options: cmd.options,
+                        type: 1
+                    });
+                    sleep(5000);
+                };
+                for(let dcmd of dcmds) {
+                    if(dcmd.name != cmd.name || dcmd.options != cmd.options || dcmd.description != cmd.desc || dcmd.type != cmd.type) {
+                        console.log("editCommand:", cmd.name);
+                        app.bot.editCommand(dcmd.id, {
+                            name: cmd.name,
+                            description: cmd.desc,
+                            options: cmd.options,
+                            type: 1
+                        });
+                        sleep(5000);
+                    };
+                };
+                */
+            };
+        };
     };
-    app.func.postAPI = async(app) => {
+    app.core.postStats = async() => {
         let 
-            os = require('os'),
             id = app.bot.user.id,
             shards = app.bot.shards.size,
             guilds = app.bot.guilds.size,
-            players = app.func.getAllPlayers(app),
-            load = os.loadavg(),
-            totalram = (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
-            usedram = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
-            freeram = ((process.memoryUsage()['rss'] - process.memoryUsage()['heapUsed']) / 1024 / 1024).toFixed(2),
-            uptime = process.uptime(),
-            data = {
-                id,
-                shards,
-                guilds,
-                players,
-                load: { one: load[0].toFixed(3), two: load[1].toFixed(3), three: load[2].toFixed(3) },
-                totalram,
-                usedram,
-                freeram,
-                uptime
-            },      
-            x = await fetch(`${conf.url}/gb/stats`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": conf.api
-                },
-                body: JSON.stringify(data)
-            }).then(r => r.json());
-        console.log(`[${app.func.timestamp(new Date())}] storeStats:`, Object.keys(x.data));
-    }
-    app.func.storeVoiceUsers = async(data) => {
-        let x = await fetch(`${conf.url}/gb/voice`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": conf.api
-            },
-            body: JSON.stringify(data)
-        }).then(r => r.json());
-        console.log(`[${app.func.timestamp(new Date())}] ${data.type}:`, x.data);
-    }
-
-    // VC Stuff
-    app.func.getAllPlayers = (app) => {
-        let n = 0;
-        app.bot.guilds.map(g => {
-            g.channels.map(c => {
-                if(c.type == 2 && c.voiceMembers.has(app.bot.user.id)) {
-                    n++;
-                }
-            });
-        });
-        return n;
+            b = { id, shards, guilds };
+            x = await app.core.postRemote(`${app.conf.api}/bot/gb`, app.conf.api_rKey, b);
+        app.core.log("postStats", Object.keys(x.data));
     };
 
-    // Generate Code Block for Eval
-    app.func.generateCodeblock = (text) => {
-        return `\`\`\`js\n${text}\n\`\`\``;
-    };
-
-    // messageCreate Handler - These are GensokyoBot's Core Commands (Move to console later)
-    app.func.messageCreate = (app, msg) => {
-        
-        if(msg.author.bot) return;
-        let usr = ["188571987835092992", "112615849566744576"];
-        if(!usr.includes(msg.author.id)) return;
-        let
-            body = msg.content.slice("!".length).split(" "),
-            cmd = body[0],
-            args = body.slice(1).join(" ");
-        if(cmd == "e") {
+    /* Web */
+    app.core.web = async() => {
+        let web = require('express')();
+        web.use(require('cors')());
+        web.post('/', async(req, res) => {
+            if(req.headers['authorization'] != app.conf.api_lKey) return res.json({ error: true, msg: "Failed to authenticate token" });
             let 
-                util            = require('util'),
-                redCol          = 0xF44336,
-                greenCol        = 0x8BC34A;
-            try {
-                let
-                    returned = eval(args),
-                    str = util.inspect(returned, {depth: 1}),
-                    embed = {
-                        title: "evaluation Results",
-                        color: greenCol,
-                        fields: [
-                            { name: "Input", value: app.func.generateCodeblock(args) },
-                            { name: "Output", value: app.func.generateCodeblock(str) }
-                        ]
-                    };
-                msg.channel.createMessage( { embeds: [embed] });
-            } catch(e) {
-                msg.channel.createMessage({
-                    embeds: [{
-                        title: "Evaluation Results",
-                        color: redCol,
-                        fields: [
-                            { name: "Input", value: app.func.generateCodeblock(args) },
-                            { name: "Output", value: app.func.generateCodeblock(e) }
-                        ]
-                    }]
-                });
-            }
-        }
-        if(cmd == "r") {
-            let state = app.modman.reload(args);
-            if(state) {
-                msg.channel.createMessage(`${args} Rloaded ^^`);
-            } else {
-                let em = bot.makeEmbed();
-                em.description("0.0 WHAT ARE YOU PLAYING AT REEEEE D:<");
-                em.image('https://media1.tenor.com/images/a715f8f49a7ca5cfa04bb4eb2899552e/tenor.gif');;
-                msg.channel.createEmbed(em);
-            }
-        }
-        if(cmd == "revive") {
-
-        }
+                stats = await botStats(app),
+                cmds = await app.core.aCommands();
+            res.json({stats, cmds});
+        });
+        web.get("*", (req, res) => res.status(404));
+        web.listen(app.conf.api_port, app.core.log(`API`, "Online"));
     };
 
-    // Event Handler
-    app.func.eventHandle = (event) => {
-        app.bot.createMessage(conf.logs, event)
-    };
 
-    // Log Hanlder
-    app.func.logHandle = (title, desc, webhook) => {
-        let 
-            hook = new Webhook(webhook),
-            em = new MessageBuilder();
-
-        em.setColor(conf.color);
-        em.setAuthor(title);
-        em.setDescription(`${desc}`);
-        em.timestamp();
-        em.setFooter(`${title} ${conf.version}`);
-        hook.send(em);
-    };
-
-    // Error Handler
-
-
-    // Timeouts
-    if(!conf.dev) { 
-        // Post
-        setTimeout(() => { 
-            app.func.postStats(app); 
-            app.func.postAPI(app); 
-        }, 3.6e+6 /* 1hr */);
+    /* Timeouts */
+    if(app.conf.env != "dev") {
+        app.core.postStats();
     }
+}; 
+
+function sleep(t) {
+    let date = Date.now();
+    let curDate = null;
+    do { 
+        curDate = Date.now(); 
+    } while(curDate - date < t);
+};
+function timestamp() {
+    let d = new Date();
+    return d.getFullYear() + "-" +
+        pad(d.getMonth() + 1, 2, "0") + "-" +
+        pad(d.getDate(), 2, "0") + " " +
+        pad(d.getHours(), 2, "0") + ":" +
+        pad(d.getMinutes(), 2, "0") + ":" +
+        pad(d.getSeconds(), 2, "0");
+};
+function pad(s, len, c) {
+    var cur = s.toString();
+    while(cur.length < len) {cur = c + cur;}
+    return cur;
 }
+function buildShards(app) {
+    let 
+        {uniqueNamesGenerator, names} = require('unique-names-generator'),
+        shards = [];
+
+    app.bot.shards.map(s => {
+        let 
+            listeners = 0,
+            players = 0;
+
+
+        s.client.guilds.map((g) => {
+            g.channels.map((c) => {
+                if(c.type == 2 && c.voiceMembers.has(app.bot.user.id)) {
+                    players++;
+                    c.voiceMembers.map((vm) => {
+                        if(vm.id != app.bot.user.id && (!vm.voiceState.selfDeaf || !vm.voiceState.deaf)) {
+                            listeners++;
+                        }
+                    });
+                }
+            }); 
+        });
+        if(shardsDB.has(`shard:${s.id}`)) {
+            let 
+                db = shardsDB.get(`shard:${s.id}`),
+                build = {
+                    id: s.id,
+                    name: db,
+                    ready: s.ready,
+                    status: s.status,
+                    latency: s.latency,
+                    guilds: s.client.guilds.size,
+                    listeners: listeners,
+                    players: players
+                };
+            shards.push(build);
+        } else {
+            let name = uniqueNamesGenerator({ dictionaries: [names] });
+            shardsDB.put(`shard:${s.id}`, name);
+            let build = {
+                id: s.id,
+                name: name,
+                ready: s.ready,
+                status: s.status,
+                latency: s.latency,
+                guilds: s.client.guilds.size,
+                listeners: listeners,
+                players: players
+            };
+            shards.push(build);
+        }
+    }); 
+    return shards
+};
+function fromSecondsToHumanUptime(time) {
+    let 
+        moment = require('moment'),
+        now = moment.utc(),
+        timer = moment.utc(moment.duration(time, 's').asMilliseconds()),
+        t = now - timer,
+        started = moment.utc(t).format('lll');
+    return started;
+}
+function botStats(app) {
+    let
+        moment = require('moment'),
+        shards = buildShards(app),
+        uptime = process.uptime(),
+        total_players = 0,
+        total_listeners = 0,
+        total_shards = 0,
+        online_shards = 0,
+        loadavg = require('os').loadavg(),
+        ram = { 
+            total: process.memoryUsage().heapTotal / 1024 / 1024,  
+            used: process.memoryUsage().heapUsed / 1024 / 1024,
+        };
+
+    app.bot.shards.map((s) => {  
+        total_shards++;      
+        if(!s.connecting) {
+            online_shards++;
+        }
+    });
+    shards.map(s => {
+        total_players += s.players;
+        total_listeners += s.listeners;
+    });
+    let 
+        now = moment.utc(),
+        upms = moment.utc(moment.duration(uptime, 's').asMilliseconds()),
+        upset = now - upms,
+        started = moment.utc(upset).format('lll'),
+        build = {
+            env: app.conf.env,
+            server: require('os').hostname(),
+            version: app.conf.version,
+            total_guilds: app.bot.guilds.size.toLocaleString(),
+            total_players,
+            total_listeners,
+            total_shards,
+            online_shards,
+            uptime: uptime,
+            started,
+            ram,
+            loadavg,
+            shards
+    };
+    
+    return build;
+};
+async function restrictedGuildRepsonse(app, msg) {
+    if(msg.guildID == "174820236481134592") {
+        app.core.createMD(msg, 30000, `<@${msg.member.id}>: Please read  <#219483023257763842> for server rules and only use commands in <#174821093633294338>`);
+    }
+    if(msg.guildID == "269896638628102144") {
+        app.core.createMD(msg, 30000, `<@${msg.member.id}>: Please read <#919975803108864021> for server rules and only use commands in <#919974561322266694>`);
+    }
+};

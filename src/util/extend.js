@@ -1,20 +1,3 @@
-/*
-    #####################################################################
-    # File: extendEris.js
-    # Title: A Radio Music Bot
-    # Author: SixAiy <me@sixaiy.com>
-    # Version: 0.5a
-    # Description:
-    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
-    #####################################################################
-
-    #####################################################################
-    # License
-    #####################################################################
-    # Copyright 2021 Contributing Authors
-    # This program is distributed under the terms of the GNU GPL.
-    ######################################################################
-*/
 function NotImplementedError(message) {
     this.name = "NotImplementedError";
     this.message = (message || "");
@@ -45,7 +28,7 @@ class Embed {
 
         return this;
     }
-    blankfield(name, value, inline = false) {
+    blankfield(inline = false) {
         this.fields.push({
             name: "\u200b",
             value: "\u200b",
@@ -103,40 +86,7 @@ class Embed {
         return this;
     }
 };
-class Components {
-    constructor(data = {}) {
-        Object.assign(this, data);
-        return this;
-    }
-    type(data) {
-        this.type = data;
-        return this;
-    }
-    style(data) {
-        this.style = data;
-        return this;
-    }
-    label(data) {
-        this.label = data;
-        return this;
-    }
-    emoji(data) {
-        this.emoji = data;
-        return this;
-    }
-    id(id) {
-        this.custom_id = id;
-        return this;
-    }
-    url(link) {
-        this.url = link;
-        return this;
-    }
-    disabled(boolean) {
-        this.disabled = boolean;
-        return this;
-    }
-};
+
 const Constants = exports.PermissionFlags = require("eris").Constants.Permissions;
 class EvaluatedPermissions {
     constructor(member, raw) {
@@ -200,50 +150,19 @@ class EvaluatedPermissions {
 };
 
 module.exports = (Eris, options = {}) => {
+    /* EvaluatedPermissions */
     Eris.EvaluatedPermissions = EvaluatedPermissions;
 
-    Eris.Client.prototype.makeComponent = function() {
-        return new Components;
-    }
-
-    Eris.Client.prototype.makeEmbed = function() {
-        return new Embed;
-    };
-    Eris.Client.prototype.additionals = function() {
+    /* Client */
+    Eris.Client.prototype.extend = function() {
         return {
-            version: 0.1,
-            author: "Sorch"
+            version: 1.0,
+            author: "Sorch & Allie"
         };
     };
-    Eris.Client.prototype.createEmbed = function(channelID, embed) {
-        return this.createMessage(channelID, {
-            embeds: [embed]
-        });
+    Eris.Client.prototype.createCode = function(channelID, code, lang = "") {
+        return this.createMessage(channelID, `\`\`\`${lang}\n${code}\n\`\`\``);
     };
-
-    Eris.CommandInteraction.prototype.createEmbed = function(embed) {
-        return this.createMessage({
-            embeds: [embed]
-        });
-    }
-    Eris.ComponentInteraction.prototype.createComponentEmbed = function(type, embed, component) {
-        return this.createMessage({
-            embeds: [embed],
-            component: [{ type: type, component: [component] }]
-        });
-    }
-    Eris.ComponentInteraction.prototype.createComponentMessage = function(type, content, component) {
-        return this.createMessage({
-            content,
-            component: [{ type: type, component: [component] }]
-        });
-    }
-    Eris.ComponentInteraction.prototype.createEmbed = function(embed) {
-        return this.createMessage({
-            embeds: [embed]
-        });
-    }
-
     Eris.Client.prototype.getAllTextChannelsAsCount = function() {
         let n = 0;
         const client = this ? this.shard.client : this;
@@ -255,7 +174,7 @@ module.exports = (Eris, options = {}) => {
             })
         })
         return n;
-    }
+    };
     Eris.Client.prototype.getAllVoiceChannelsAsCount = function() {
         let n = 0;
         const client = this ? this.shard.client : this;
@@ -267,7 +186,7 @@ module.exports = (Eris, options = {}) => {
             })
         })
         return n;
-    }
+    };
     Eris.Client.prototype.getAllPlayingChannelsCount = function() {
         let n = 0;
         const client = this ? this.shard.client : this._client;
@@ -279,10 +198,6 @@ module.exports = (Eris, options = {}) => {
             });
         });
         return n;
-    }
-    Eris.Channel.prototype.createEmbed = function(embed) {
-        const client = this.guild ? this.guild.shard.client : this._client;
-        return client.createEmbed(this.id, embed);
     };
     Eris.Client.prototype.setStatus = function(status, ty, url) {
         url = url || null;
@@ -313,7 +228,7 @@ module.exports = (Eris, options = {}) => {
         } else {
             throw Error("Statuses are only playing twitch watching listening and custom");
         }
-    }
+    };
     Eris.Client.prototype.findVoiceChannel = function(name) {
         let channelname;
         const client = this ? this.shard.client : this._client;
@@ -325,48 +240,155 @@ module.exports = (Eris, options = {}) => {
             })
         })
         return channelname;
+    };
+    Eris.Client.prototype.makeEmbed = function() {
+        return new Embed;
+    };
+    Eris.Client.prototype.createEmbed = function(channelID, embed) {
+        return this.createMessage(channelID, {
+            embeds: [embed]
+        });
+    };
+
+    /* Interaction */
+    Eris.CommandInteraction.prototype.createEmbed = function(embed) {
+        return this.createMessage({  embeds: [embed] });
+    };
+    Eris.ComponentInteraction.prototype.createEmbed = function(embed) {
+        return this.createMessage({ embeds: [embed] });
+    };
+    Eris.ComponentInteraction.prototype.createEmbeds = function(embeds) {
+        return this.createMessage({ embeds });
+    };
+    Eris.CommandInteraction.prototype.createEmbeds = function(embeds) {
+        return this.createMessage({embeds});
+    };
+    Eris.CommandInteraction.prototype.createCommandEmbed = function(type, embed, component) {
+        return this.createMessage({ embeds: [embed], components: [{ type, components: [component] }] });
+    };
+    Eris.ComponentInteraction.prototype.createComponentEmbed = function(type, embed, component) {
+        return this.createMessage({ embeds: [embed], components: [{ type, components: [component] }] });
+    };
+    Eris.ComponentInteraction.prototype.createComponentMessage = function(type, content, component) {
+        return this.createMessage({ content, components: [{ type, components: [component] }] });
+    };
+    Eris.CommandInteraction.prototype.createComponentMessage = function(type, content, component) {
+        return this.createMessage({ content, components: [{ type, components: [component] }] })
+    };
+    Eris.ComponentInteraction.prototype.createCode = function(code, lang = "") {
+        return this.createMessage(`\`\`\`${lang}\n${code}\`\`\``);
     }
+    Eris.CommandInteraction.prototype.createCode = function(code, lang = "") {
+        return this.createMessage(`\`\`\`${lang}\n${code}\`\`\``);
+    }
+    Eris.ComponentInteraction.prototype.createEval = function(code) {
+        try {
+            let 
+                returned = eval(code),
+                str = require('util').inspect(returned, { depth: 1 }),
+                embed = {
+                    title: "evaluation Results",
+                    color: 0x8BC34A,
+                    fields: [
+                        { name: "Input", value: `\`\`\`js\n${code}\`\`\`` },
+                        { name: "Output", value: `\`\`\`js\n${str}\`\`\`` }
+                    ]
+                };
+            return this.createMessage({embeds:[embed]});
+        } catch(e) {
+            let embed = {
+                title: "Evaluation Results",
+                color: 0xF44336,
+                fields: [
+                    { name: "Input", value: `\`\`\`js\n${code}\`\`\`` },
+                    { name: "Output", value: `\`\`\`js\n${e}\`\`\`` }
+                ]
+            };
+            return this.createMessage({embeds:[embed]});
+        }
+    };
+    Eris.CommandInteraction.prototype.createEval = function(code) {
+        try {
+            let 
+                returned = eval(code),
+                str = require('util').inspect(returned, { depth: 1 }),
+                embed = {
+                    title: "evaluation Results",
+                    color: 0x8BC34A,
+                    fields: [
+                        { name: "Input", value: `\`\`\`js\n${code}\`\`\`` },
+                        { name: "Output", value: `\`\`\`js\n${str}\`\`\`` }
+                    ]
+                };
+            return this.createMessage({embeds:[embed]});
+        } catch(e) {
+            let embed = {
+                title: "Evaluation Results",
+                color: 0xF44336,
+                fields: [
+                    { name: "Input", value: `\`\`\`js\n${code}\`\`\`` },
+                    { name: "Output", value: `\`\`\`js\n${e}\`\`\`` }
+                ]
+            };
+            return this.createMessage({embeds:[embed]});
+        }
+    };
+
+    /* Channel */
+    Eris.Channel.prototype.createEmbed = function(embed) {
+        const client = this.guild ? this.guild.shard.client : this._client;
+        return client.createEmbed(this.id, embed);
+    };
+
+    /* User */
+    Eris.User.prototype.createMessage = function(content) {
+        return new Promise((resolve, reject) => {
+            this.getDMChannel().then(channel => {
+                channel.createMessage(content).then(resolve).catch(reject);
+            }).catch(reject);
+        });
+    };
+    Eris.User.prototype.createEmbed = function(embed) {
+        return new Promise((res, rej) => {
+            this.getDMChannel().then(c => {
+                c.createMessage({ embeds: [embed]}).then(res).catch(rej);
+            }).catch(rej);
+        })
+    };
+
+    /* Member */
     Eris.Member.prototype.hasPermission = function(perm) {
         return this.permissions.has(perm);
-    };
-    Eris.Client.prototype.createCode = function(channelID, code, lang = "") {
-        return this.createMessage(channelID, `\`\`\`${lang}\n${code}\n\`\`\``);
-    };
-    Eris.Channel.prototype.createCode = function(code, lang) {
-        const client = this.guild ? this.guild.shard.client : this._client;
-        return client.createCode(this.id, code, lang);
     };
     Eris.Member.prototype.hasRole = function(roleID) {
         if (roleID.id) roleID = roleID.id;
         return !!~this.roles.indexOf(roleID);
     };
-    Eris.User.prototype.createMessage = function(content, file) {
-        return new Promise((resolve, reject) => {
-            this.getDMChannel().then(channel => {
-                channel.createMessage(content, file).then(resolve).catch(reject);
-            }).catch(reject);
-        });
-    }
-    Object.defineProperty(Eris.Member.prototype, "tag", {
-        get: function() {
-            return `${this.username}#${this.discriminator}`;
-        }
-    });
-    Eris.Role.prototype.higherThan = function(role) {
-        if (this.position === role.position) return role.id - this.id > 0;
-        else return this.position - role.position > 0;
-    };
-    Object.defineProperty(Eris.Member.prototype, "roleObjects", {
-        get: function() {
-            return this.roles.map(roleID => this.guild.roles.get(roleID));
-        }
-    });
     Eris.Member.prototype.punishable = function(member2) {
         if (this.id === member2.id) return false;
         else if (this.id === this.guild.ownerID) return false;
         else if (member2.id === this.guild.ownerID) return true;
         else return !this.highestRole.higherThan(member2.highestRole);
     };
+
+    /* Role */
+    Eris.Role.prototype.higherThan = function(role) {
+        if (this.position === role.position) return role.id - this.id > 0;
+        else return this.position - role.position > 0;
+    };
+
+
+    /* Object */
+    Object.defineProperty(Eris.Member.prototype, "tag", {
+        get: function() {
+            return `${this.username}#${this.discriminator}`;
+        }
+    });
+    Object.defineProperty(Eris.Member.prototype, "roleObjects", {
+        get: function() {
+            return this.roles.map(roleID => this.guild.roles.get(roleID));
+        }
+    });
     Object.defineProperty(Eris.Member.prototype, "kickable", {
         get: function() {
             const clientMember = this.guild.members.get(this.guild.shard.client.user.id);
@@ -392,7 +414,6 @@ module.exports = (Eris, options = {}) => {
             else return this.roleObjects.reduce((prev, role) => !prev || role.higherThan(prev) ? role : prev);
         }
     });
-
     Object.defineProperty(Eris.Member.prototype, 'effectiveName', {
         get: function() {
             return this.nick || this.username;
@@ -409,5 +430,4 @@ module.exports = (Eris, options = {}) => {
             return this.members.map(member => member.permission);
         }
     });
-
 };

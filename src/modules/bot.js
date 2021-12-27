@@ -1,111 +1,187 @@
-/*
-    #####################################################################
-    # File: bot.js
-    # Title: A Radio Music Bot
-    # Author: SixAiy <me@sixaiy.com>
-    # Version: 0.5a
-    # Description:
-    #  A GensokyoRadio.net Discord bot for playing the radio on discord.
-    #####################################################################
-
-    #####################################################################
-    # License
-    #####################################################################
-    # Copyright 2021 Contributing Authors
-    # This program is distributed under the terms of the GNU GPL.
-    ######################################################################
-*/
-
 "use strict"
 
-let 
-    mod = require('../util/mod').Module("bot"),
-    conf = require('../conf'),
-    os = require("os");
+let mod = require('../util/mod').Module("bot");
 
 mod.command("help", {
     desc: "Shows a list of all commands",
-    rank: 0,
-    func: async function(app, msg, args, rank) {
-        let 
-            //out = "",
-            cmd_name = "",
-            cmd_desc = "",
-            components = [
-                {
-                    type: 2,
-                    label: "Status",
-                    style: 5,
-                    url: `${conf.site}/status`
-                },
-                {
-                    type: 2,
-                    label: "Support",
-                    style: 5,
-                    url: `${conf.site}/support`
-                },
-                {
-                    type: 2,
-                    label: "Invite",
-                    style: 5,
-                    url: `https://discord.com/oauth2/authorize?client_id=302857939910131712&scope=bot%20applications.commands&permissions=305261734`
-                },
-                {
-                    type: 2,
-                    label: "Botteh - Moderation Bot",
-                    style: 5,
-                    url: "https://discord.com/oauth2/authorize?client_id=897240962076647464&scope=bot&permissions=1610087639"
-                }
-            ],
-            mods = app.modman.getPlugins(),
-            em = app.bot.makeEmbed();
-
-        mods.map((m) => {
-            let mdata = app._plugins[m].mod.getAllCommands();
-            mdata.map((md) => {
-                cmd_name += `/${md.name}\n`;
-                cmd_desc += `${md.desc}\n`;
-                //return (`✦ ${md.name}: ${md.desc}`);
-            });
-            //out += `${loaded.join("\n")}`;
-            
+    func: async function(app, msg, args) { 
+        msg.member.user.getDMChannel().then(c => {
+            let content = `
+What to add GensokyoBot to your server? If you have Manage Service Permissions for your guild, you can invite Gensokyobot:
+${app.conf.domain}/add
+    
+Need help or have any ideas for GensokyoBot? Pherhaps you just want to hang out? Join the GensokyoBot Community!
+${app.conf.domain}/support
+    
+You can not send GensokyoBot commands through DMs.
+Created by Fre_d and Developed by SixAiy (Allie | アリー)
+            `;
+            c.createMessage(content);
         });
-        em.author("Commands List");
-        em.thumbnail(msg.channel.guild.iconURL)
-        em.field("Command", cmd_name, true);
-        em.field("Description", cmd_desc, true);
-        em.color(conf.embed_color);
-        em.footer(`Project ${app.bot.user.username}`, app.bot.user.avatarURL);
-        em.timestamp();
+        msg.createMessage(`${msg.member.user.username}: Documentation has been sent to your DMs!\nSay \`/commands\` to learn what this bot can do!`);
+    }
+});
 
-        app.func.helpEmbed(msg, em, components);
+mod.command("commands", {
+    desc: "Shows all the commands for the bot",
+    func: async function(app, msg, args) {
+        let 
+            cmds = await app.core.aCommands(),
+            em = app.bot.makeEmbed(),
+            cmd = "";
+
+        for(let x of cmds) {
+            if(!x.masterGuild) {
+                cmd += `${x.name}:  ${x.desc}\n`;
+            }
+        }
+        
+        em.color(app.conf.color);
+        em.author("Commands List");
+        em.thumbnail(msg.channel.guild.iconURL);
+        em.description(`\`\`\`yaml\n${cmd}\`\`\``);
+        em.timestamp();
+        em.footer(`Project ${app.bot.user.username} v${app.conf.version} | Environment: ${app.conf.env}`);
+        msg.createEmbed(em);
     }
 });
 
 mod.command("stats", {
     desc: "Shows Stastic Info.",
-    rank: 0,
-    func: async function(app, msg, args, rank) {
+    func: async function(app, msg, args) {
         let 
+            stats = await app.core.stats(),
             em = app.bot.makeEmbed(),
-            loadavg = os.loadavg(),
-            totalram = (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
-            usedram = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
-            uptime = process.uptime(),
-            network = await app.func.utrStatus();
-                
-                
-        em.author(`${app.bot.user.username} Stats`, app.bot.user.avatarURL);
-        em.field('Bot', `Uptime: **${app.func.dhm(uptime)}**\nMemory: **${usedram} MB / ${totalram} MB**\nLoad Avg: **${loadavg[0].toFixed(3)}**, **${loadavg[1].toFixed(3)}**, **${loadavg[2].toFixed(3)}**`, false);
-        em.field("Shard", `On Shard: **${msg.member.guild.shard.id}**\nShards: **${app.bot.shards.size.toLocaleString()}**\nGuilds: **${app.bot.guilds.size.toLocaleString()}**`, false);
-        em.field("Voice", `Players: **${app.func.getAllPlayers(app)}**\nListeners: **${app.func.getAllPlayers(app)}**`, false);
-        em.field("Network", network, false);
+            build = ``;
+
+        em.color(app.conf.color);
+        em.author(`Stastics`);
+        em.thumbnail(app.bot.user.avatarURL);
+        build = `
+**Bot**
+\`\`\`yaml
+Started: ${stats.started} UTC
+Memory: ${stats.ram.used.toFixed(2)} MB / ${stats.ram.total.toFixed(2)} MB
+Load Avg: ${stats.loadavg[0].toFixed(3)}, ${stats.loadavg[1].toFixed(3)}, ${stats.loadavg[1].toFixed(3)}
+\`\`\`
+**Sharding**
+\`\`\`yaml
+Online: ${stats.online_shards} / ${stats.total_shards}
+Total Guilds: ${stats.total_guilds}
+Total Players: ${stats.total_players}
+Total Listeners: ${stats.total_listeners}
+\`\`\``;
+        for(let shard of stats.shards) {
+            if(shard.id == msg.member.guild.shard.id) {
+                if(shard.status == "ready") {
+                    console.log(shard);
+                    build += `
+**Operating on ${shard.name}**
+\`\`\`yaml
+ID: ${shard.id}
+Name: ${shard.name}
+Status: ${shard.status}
+Ping: ${shard.latency}ms
+Guilds: ${shard.guilds}
+Players: ${shard.players}
+Listeners: ${shard.listeners}
+\`\`\``;
+                }
+            }
+        }
+        
+        em.description(build);
         em.timestamp();
-        em.color(conf.embed_color);
-        em.footer(`Project ${app.bot.user.username}`);
-                
+        em.footer(`Project ${app.bot.user.username} v${app.conf.version} | Environment: ${app.conf.env}`);
         msg.createEmbed(em);
     }
 });
 
+mod.command("conf", {
+    desc: "Bot Configuration",
+    options: [
+        { name: "eval", description: "Evals Things", options: [{ name: "data", description: "Object.keys(app.core);", type: 3, required: true }], type: 1 }, 
+        { name: "reload", description: "Reloads plugin/Updates on Discord", options: [{ name: "mod", description: "name", type: 3, required: true }], type: 1 }, 
+        { name: "revive", description: "Revivies a Shard", options: [{ name: "shard", description: "id", type: 3 }], type: 1, required: true }
+    ],
+    masterGuild: true,
+    func: async function(app, msg, args) {
+        let 
+            cmd = msg.data.options[0].name,
+            value = msg.data.options[0].options[0].value;
+
+        if(cmd == "eval") {
+            console.log(msg.id);
+            try {
+                let
+                    returned = eval(value),
+                    str = require('util').inspect(returned, {depth: 1}),
+                    embed = {
+                        title: "evaluation Results",
+                        color: 0x8BC34A,
+                        fields: [
+                            { name: "Input", value: `\`\`\`js\n${value}\`\`\`` },
+                            { name: "Output", value: `\`\`\`js\n${str}\`\`\`` }
+                        ]
+                    };
+                return msg.createMessage({ embeds: [embed] });
+            } catch(e) {
+                let embed = {
+                    title: "Evaluation Results",
+                    color: 0xF44336,
+                    fields: [
+                        { name: "Input", value: `\`\`\`js\n${value}\`\`\`` },
+                        { name: "Output", value: `\`\`\`js\n${e}\`\`\`` }
+                    ]
+                };
+                return msg.createMessage({ embeds: [embed] });
+            };
+        };
+        if(cmd == "reload") {
+            let state = await app.core.ModuleHandler('rl', value);
+            await msg.defer();
+            msg.createMessage(state);
+        };
+        if(cmd == "revive") {
+            if(isNaN(value)) return msg.createMessage("Error you need to provide a shard id number");
+            let shard = parseInt(value);
+            msg.createMessage(`Reviving Shard ${shard}`).then(async() => {
+                let msgid = 0;
+                msg.channel.messages.map((m) => {
+                    if(m.author.id == app.bot.user.id && m.author.bot && m.interaction.user.id == msg.member.id) {
+                        msgid = m.id;
+                    }
+                });
+                console.log(shard);
+                app.bot.shards.get(shard).disconnect();
+                app.core.sleep(5000);
+                app.bot.shards.get(shard).connect();
+                msg.editMessage(msgid, `Shard ${shard} has restarted`)
+            });
+        };
+    }
+});
+
 exports.mod = mod;
+
+
+
+/*
+Example Creation of custom command
+
+bot.createGuildCommand(GUILD_ID, { 
+    name: "conf", 
+    description: "Bot Configuration", 
+    options: [
+        { name: "eval", description: "Evals Things", options: [{ name: "data", description: "blah", type: 3 }], type: 1 }, 
+        { name: "reload", description: "Reloads plugin/Updates on Discord", options: [{ name: "mod", description: "name", type: 3 }], type: 1 }, 
+        { name: "revive", description: "Revivies a Shard", options: [{ name: "shard", description: "id/name", type: 3 }], type: 1 }
+    ], 
+    type: 1,
+                        permissions: [{
+                            id: "188571987835092992",
+                            type: 2,
+                            permission: true
+                        }]
+});
+*/
