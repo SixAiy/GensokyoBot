@@ -1,10 +1,15 @@
 "use strict"
 
 let 
+    database = require('./db'),
     flatfile = require('flat-file-db'),
-    shardsDB = flatfile(`${process.cwd()}/src/db/shards.db`);
+    shardsDB = flatfile(`${process.cwd()}/src/db/shards.db`),
+    autoMusicDB = flatfile(`${process.cwd()}/src/db/automusic.db`),
+    music_timeout = 0,
+    music_recheck = 0,
+    music_OldTitle = "";
 
-module.exports = (app) => {
+module.exports = async(app) => {
 
     /* Global */
     app.core.figlet = async(title) => { 
@@ -55,9 +60,10 @@ module.exports = (app) => {
         app.bot.on("error", (e) => app.core.log("error", e.stack));
         app.bot.on("ready", () => { 
             if(app.conf.firstRegister) app.core.iCommands(); 
-            buildShards(app);
             app.core.log("Ready", "Discord"); 
-            app.core.status("online", "in Developement");
+            app.core.setMusicStatus();
+            shardManager(app);
+            //app.bot.setStatus("online","in Developement", "listening");
         });
         app.bot.on("shardReady", (x) => app.core.log("Shard", `${x} Ready`));
         app.bot.on("shardDisconnect", (e, x) => app.core.log("Shard", `${x} Disconnected`));
@@ -141,9 +147,6 @@ module.exports = (app) => {
             if(state) return `**${mod}** Disabled`;
             return `Failed to disable **${mod}**`;
         };
-    };
-    app.core.status = async(state, details) => {
-        app.bot.editStatus(state, { name: details, type: 0 });
     };
     app.core.gCommand = async(msg) => {
         if(!msg.token) return
@@ -237,6 +240,76 @@ module.exports = (app) => {
             x = await app.core.postRemote(`${app.conf.api}/bot/gb`, app.conf.api_rKey, b);
         app.core.log("postStats", Object.keys(x.data));
     };
+    app.core.setMusicStatus = async() => {
+        let m = await require('node-fetch')(app.conf.fm_api).then(r => r.json());
+        if(!m.is_online) {
+            clearTimeout(music_timeout);
+            music_timeout = setTimeout(() => app.core.setMusicStatus(), 30000);
+            app.bot.setStatus("dnd", `/help | v${app.cof.version}`, "playing");
+        } else {
+            let 
+                title = m.song_info.title,
+                artist = m.song_info.artist,
+                remaining = m.song_times.remaining,
+                played = m.song_times.played;
+            if(title != "" && title != music_OldTitle && !isNaN(played) && remaining >= 0) {
+                let song = `${title} - ${artist}`;    
+                app.bot.setStatus("online", song, "playing");
+                clearTimeout(music_timeout);
+                if(remaining < 10) {
+                    music_timeout = setTimeout(() => app.core.setMusicStatus(), 5000);
+                } else {
+                    music_timeout = setTimeout(() => app.core.setMusicStatus(), remaining * 1000);
+                }
+                music_OldTitle = title;
+                music_recheck = 0;
+            } else {
+                music_recheck++;
+                let n;
+                switch (music_recheck) {
+                    case 1:
+                        n = Math.floor((Math.random() * 10) + 1);
+                        break;
+                    case 2:
+                        n = Math.floor((Math.random() * 10) + 10);
+                        break;
+                    case 3:
+                        n = Math.floor((Math.random() * 15) + 15);
+                        break;
+                    case 4:
+                        n = Math.floor((Math.random() * 15) + 30);
+                        break;
+                    default:
+                        n = Math.floor((Math.random() * 20) + 45);
+                        break;
+                }
+                clearTimeout(music_timeout);
+                music_timeout = setTimeout(() => app.core.setMusicStatus(), (n * 1000));
+            }
+        }
+    };
+    app.core.setAutoMusic = async(msg) => {
+        let 
+            enabled = false,
+            channel = 0;
+        for(let x of msg.data.options[0].options) {
+            if(x.name == "enable") enabled = x.value;
+            if(x.name == "channel_id") channel = x.value;
+        }
+        if(enabled) {
+            let build = { enable: enabled, channel_id: channel };
+            autoMusicDB.put(`automusic:${msg.guildID}`, build);
+            return `Now Playing is setup for <#${channel}>`;
+        } else {
+            if(autoMusicDB.has(`automusic:${msg.guildID}`)) {
+                autoMusicDB.put(`automusic:${msg.guildID}`, {});
+                return `I have disabled the music from playing in the channel`;
+            } else {
+                return `Sorry but you have not enabled the auto now playing feature yet!`;
+            };
+        };
+    };
+    app.core.autoMusic = async() => {};
 
     /* Web */
     app.core.web = async() => {
@@ -253,12 +326,12 @@ module.exports = (app) => {
         web.listen(app.conf.api_port, app.core.log(`API`, "Online"));
     };
 
-
     /* Timeouts */
     if(app.conf.env != "dev") {
         app.core.postStats();
     }
-}; 
+};
+
 
 function sleep(t) {
     let date = Date.now();
@@ -281,13 +354,72 @@ function pad(s, len, c) {
     while(cur.length < len) {cur = c + cur;}
     return cur;
 }
-function buildShards(app) {
+function shardManager(app) {
+    /*
     let 
-        {uniqueNamesGenerator, names} = require('unique-names-generator'),
+        {uniqueNamesGenerator, starWars} = require('unique-names-generator'),
         shards = [];
 
-    app.bot.shards.map(s => {
+    app.bot.shards.forEach(async(s) => {
+        sleep(5000);
         let 
+            shardb = await database.sharding.findOne({ shard_id: s.id }),
+            build = {},
+            listeners = 0,
+            players = 0;
+
+        s.client.guilds.forEach((g) => {
+            g.channels.forEach((c) => {
+                if(c.type == 2 && c.voiceMembers.has(app.bot.user.id)) {
+                    players++;
+                    c.voiceMembers.forEach((vm) => {
+                        if(vm.id != app.bot.user.id && (!vm.voiceState.selfDeaf || !vm.voiceState.deaf)) {
+                            listeners++;
+                        }
+                    });
+                }
+            }); 
+        });
+
+        if(shardb != null || shardb != undefined) {
+            build = {
+                id: s.id,
+                name: shardb.shard_name,
+                ready: s.ready,
+                status: s.status,
+                latency: s.latency,
+                guilds: s.client.guilds.size,
+                listeners: listeners,
+                players: players
+            };
+        } else {
+            let name = uniqueNamesGenerator({ dictionaries: [starWars] });
+            new database.sharding({ shard_id: s.id, shard_name: name }).save();
+            build = {
+                id: s.id,
+                name: name,
+                ready: s.ready,
+                status: s.status,
+                latency: s.latency,
+                guilds: s.client.guilds.size,
+                listeners: listeners,
+                players: players
+            };
+        }
+        shards.push(build);
+    }); 
+    console.log(shards);
+    return shards;
+    */
+    
+    let 
+        {uniqueNamesGenerator, starWars} = require('unique-names-generator'),
+        shards = [];
+
+    app.bot.shards.map(async(s) => {
+        let 
+            shardb = await database.sharding.findOne({ shard_id: s.id }),
+            build = {},
             listeners = 0,
             players = 0;
 
@@ -304,24 +436,21 @@ function buildShards(app) {
                 }
             }); 
         });
-        if(shardsDB.has(`shard:${s.id}`)) {
-            let 
-                db = shardsDB.get(`shard:${s.id}`),
-                build = {
-                    id: s.id,
-                    name: db,
-                    ready: s.ready,
-                    status: s.status,
-                    latency: s.latency,
-                    guilds: s.client.guilds.size,
-                    listeners: listeners,
-                    players: players
-                };
-            shards.push(build);
+        if(shardb != null || shardb != undefined) {
+            build = {
+                id: s.id,
+                name: shardb.shard_name,
+                ready: s.ready,
+                status: s.status,
+                latency: s.latency,
+                guilds: s.client.guilds.size,
+                listeners: listeners,
+                players: players
+            };
         } else {
-            let name = uniqueNamesGenerator({ dictionaries: [names] });
-            shardsDB.put(`shard:${s.id}`, name);
-            let build = {
+            let name = uniqueNamesGenerator({ dictionaries: [starWars] });
+            new database.sharding({ shard_id: s.id, shard_name: name }).save();
+            build = {
                 id: s.id,
                 name: name,
                 ready: s.ready,
@@ -331,10 +460,12 @@ function buildShards(app) {
                 listeners: listeners,
                 players: players
             };
-            shards.push(build);
-        }
+        };
+        shards.push(build);
     }); 
-    return shards
+    console.log(shards);
+    return shards;
+    
 };
 function fromSecondsToHumanUptime(time) {
     let 
@@ -347,8 +478,7 @@ function fromSecondsToHumanUptime(time) {
 }
 function botStats(app) {
     let
-        moment = require('moment'),
-        shards = buildShards(app),
+        shards = shardManager(app),
         uptime = process.uptime(),
         total_players = 0,
         total_listeners = 0,
@@ -370,25 +500,20 @@ function botStats(app) {
         total_players += s.players;
         total_listeners += s.listeners;
     });
-    let 
-        now = moment.utc(),
-        upms = moment.utc(moment.duration(uptime, 's').asMilliseconds()),
-        upset = now - upms,
-        started = moment.utc(upset).format('lll'),
-        build = {
-            env: app.conf.env,
-            server: require('os').hostname(),
-            version: app.conf.version,
-            total_guilds: app.bot.guilds.size.toLocaleString(),
-            total_players,
-            total_listeners,
-            total_shards,
-            online_shards,
-            uptime: uptime,
-            started,
-            ram,
-            loadavg,
-            shards
+    let build = {
+        env: app.conf.env,
+        server: require('os').hostname(),
+        version: app.conf.version,
+        total_guilds: app.bot.guilds.size.toLocaleString(),
+        total_players,
+        total_listeners,
+        total_shards,
+        online_shards,
+        uptime: uptime,
+        started: fromSecondsToHumanUptime(uptime),
+        ram,
+        loadavg,
+        shards
     };
     
     return build;
@@ -401,3 +526,47 @@ async function restrictedGuildRepsonse(app, msg) {
         app.core.createMD(msg, 30000, `<@${msg.member.id}>: Please read <#919975803108864021> for server rules and only use commands in <#919974561322266694>`);
     }
 };
+
+
+
+/*
+app.core.stats = async() => { 
+    let 
+        shards = await app.core.shardManager(),
+        uptime = process.uptime(),
+        loadavg = require('os').loadavg(),
+        online_shards = 0,
+        total_players = 0,
+        total_listeners = 0,
+        ram = { 
+            total: `${(process.memoryUsage().heapTotal / 1024 / 1024).toFixed(2)}MB`,  
+            used: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB`,
+        };
+    shards.map(s => {
+        total_players += s.players;
+        total_listeners += s.listeners;
+        if(s.ready) online_shards++;
+    });
+    
+    let build = {
+        env: app.conf.env,
+        server: require('os').hostname(),
+        version: app.conf.version,
+        total_guilds: app.bot.guilds.size.toLocaleString(),
+        total_players: total_players.toLocaleString(),
+        total_listeners: total_listeners.toLocaleString(),
+        total_shards: app.bot.shards.size.toLocaleString(),
+        online_shards: online_shards.toLocaleString(),
+        uptime: uptime,
+        started: fromSecondsToHumanUptime(uptime),
+        ram,
+        loadavg,
+        shards,
+    };
+    
+    return build;
+};
+app.core.shardManager = async() => {
+    
+};
+*/

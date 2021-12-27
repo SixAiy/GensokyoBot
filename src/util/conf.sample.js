@@ -25,5 +25,5 @@ module.exports = {
     mguild:         "269896638628102144",
     owner:          "188571987835092992",
 
-    status:     { s: "online", x: { name: "", type: 0 } }
+    db_url:         "",
 };

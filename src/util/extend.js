@@ -160,86 +160,31 @@ module.exports = (Eris, options = {}) => {
             author: "Sorch & Allie"
         };
     };
-    Eris.Client.prototype.createCode = function(channelID, code, lang = "") {
-        return this.createMessage(channelID, `\`\`\`${lang}\n${code}\n\`\`\``);
-    };
-    Eris.Client.prototype.getAllTextChannelsAsCount = function() {
-        let n = 0;
-        const client = this ? this.shard.client : this;
-        client.guilds.map(m => {
-            m.channels.map(ch => {
-                if (ch.type == 0) {
-                    n++;
-                }
-            })
-        })
-        return n;
-    };
-    Eris.Client.prototype.getAllVoiceChannelsAsCount = function() {
-        let n = 0;
-        const client = this ? this.shard.client : this;
-        client.guilds.map(m => {
-            m.channels.map(ch => {
-                if (ch.type == 2) {
-                    n++;
-                }
-            })
-        })
-        return n;
-    };
-    Eris.Client.prototype.getAllPlayingChannelsCount = function() {
-        let n = 0;
-        const client = this ? this.shard.client : this._client;
-        client.guilds.map(m => {
-            m.channels.map(c => {
-                if(c.type == 2 && c.members.includes(client.user.id)) {
-                    n++;
-                }
-            });
-        });
-        return n;
-    };
-    Eris.Client.prototype.setStatus = function(status, ty, url) {
+    Eris.Client.prototype.setStatus = function(state, name, ty, url) {
         url = url || null;
         const statuses = {
             "playing": 0,
             "twitch": 1,
             "listening": 2,
-            "watching": 3,
-            "custom": 4
+            "watching": 3
         };
         if (statuses.hasOwnProperty(ty)) {
-            const statusid = statuses[ty];
-            if (statusid == 4) {
-                throw new NotImplementedError("Not a function");
-            }
-            if (statusid == 1 && url) {
-                return this.editStatus("online", {
-                    name: status,
-                    type: statusid,
+            const type = statuses[ty];
+            if (type == 1 && url) {
+                return this.editStatus(state, {
+                    name: name,
+                    type: type,
                     url: url
                 });
             } else {
-                return this.editStatus("online", {
-                    name: status,
-                    type: statusid
+                return this.editStatus(state, {
+                    name: name,
+                    type: type
                 });
             }
         } else {
             throw Error("Statuses are only playing twitch watching listening and custom");
         }
-    };
-    Eris.Client.prototype.findVoiceChannel = function(name) {
-        let channelname;
-        const client = this ? this.shard.client : this._client;
-        client.guilds.map(g => {
-            g.channels.map(ch => {
-                if (ch.type == 2 && ch.id == name) {
-                    channelname = ch;
-                }
-            })
-        })
-        return channelname;
     };
     Eris.Client.prototype.makeEmbed = function() {
         return new Embed;
@@ -262,76 +207,6 @@ module.exports = (Eris, options = {}) => {
     };
     Eris.CommandInteraction.prototype.createEmbeds = function(embeds) {
         return this.createMessage({embeds});
-    };
-    Eris.CommandInteraction.prototype.createCommandEmbed = function(type, embed, component) {
-        return this.createMessage({ embeds: [embed], components: [{ type, components: [component] }] });
-    };
-    Eris.ComponentInteraction.prototype.createComponentEmbed = function(type, embed, component) {
-        return this.createMessage({ embeds: [embed], components: [{ type, components: [component] }] });
-    };
-    Eris.ComponentInteraction.prototype.createComponentMessage = function(type, content, component) {
-        return this.createMessage({ content, components: [{ type, components: [component] }] });
-    };
-    Eris.CommandInteraction.prototype.createComponentMessage = function(type, content, component) {
-        return this.createMessage({ content, components: [{ type, components: [component] }] })
-    };
-    Eris.ComponentInteraction.prototype.createCode = function(code, lang = "") {
-        return this.createMessage(`\`\`\`${lang}\n${code}\`\`\``);
-    }
-    Eris.CommandInteraction.prototype.createCode = function(code, lang = "") {
-        return this.createMessage(`\`\`\`${lang}\n${code}\`\`\``);
-    }
-    Eris.ComponentInteraction.prototype.createEval = function(code) {
-        try {
-            let 
-                returned = eval(code),
-                str = require('util').inspect(returned, { depth: 1 }),
-                embed = {
-                    title: "evaluation Results",
-                    color: 0x8BC34A,
-                    fields: [
-                        { name: "Input", value: `\`\`\`js\n${code}\`\`\`` },
-                        { name: "Output", value: `\`\`\`js\n${str}\`\`\`` }
-                    ]
-                };
-            return this.createMessage({embeds:[embed]});
-        } catch(e) {
-            let embed = {
-                title: "Evaluation Results",
-                color: 0xF44336,
-                fields: [
-                    { name: "Input", value: `\`\`\`js\n${code}\`\`\`` },
-                    { name: "Output", value: `\`\`\`js\n${e}\`\`\`` }
-                ]
-            };
-            return this.createMessage({embeds:[embed]});
-        }
-    };
-    Eris.CommandInteraction.prototype.createEval = function(code) {
-        try {
-            let 
-                returned = eval(code),
-                str = require('util').inspect(returned, { depth: 1 }),
-                embed = {
-                    title: "evaluation Results",
-                    color: 0x8BC34A,
-                    fields: [
-                        { name: "Input", value: `\`\`\`js\n${code}\`\`\`` },
-                        { name: "Output", value: `\`\`\`js\n${str}\`\`\`` }
-                    ]
-                };
-            return this.createMessage({embeds:[embed]});
-        } catch(e) {
-            let embed = {
-                title: "Evaluation Results",
-                color: 0xF44336,
-                fields: [
-                    { name: "Input", value: `\`\`\`js\n${code}\`\`\`` },
-                    { name: "Output", value: `\`\`\`js\n${e}\`\`\`` }
-                ]
-            };
-            return this.createMessage({embeds:[embed]});
-        }
     };
 
     /* Channel */

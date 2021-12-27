@@ -31,46 +31,80 @@ mod.command("play", {
 });
 
 mod.command("now", {
-    desc: "Displays the current song",
+    desc: "Now Playing Settings",
+    options: [
+        { 
+            name: "auto", 
+            description: "Auto Posts song to selected channel", 
+            options: [ 
+                { 
+                    name: "enable", 
+                    description: "Enables or Disableds auto post for the now playing song", 
+                    type: 5
+                },
+                {
+                    name: "channel_id",
+                    description: "posts to selected channel",
+                    type: 7
+                }
+            ], 
+            type: 1 
+        },
+        { 
+            name: "playing", 
+            description: "Displays the current playing song", 
+            type: 1
+        }
+    ],
+    masterGuild: true,
     func: async function(app, msg, args) {
-        let 
-            api = await app.core.getRemote(app.conf.fm_api).then(r => r.json()),
-            em = app.bot.makeEmbed();
-
-        await msg.defer();
-        if(!api.is_online) return app.core.createMessage(msg, `Music API is currently offline`);
-
-        let
-            serverInfo = api.server_info,
-            songInfo = api.song_info,
-            songTimes = api.song_times,
-            songData = api.song_data,
-            misc = api.misc,
-			duration = songTimes.duration,
-			xdur = songTimes.played,
-			durM = (Math.floor(duration / 60)),
-			durS = (duration % 60),
-			xdurM = (Math.floor(xdur / 60)),
-			xdurS = (xdur % 60),
-            song_link = misc.songlink ? misc.songlink : "https://gensokyobot.com";
-        
-        if(durS < 10) durS = "0" + durS;
-        if(xdurS < 10) xdurS = "0" + xdurS;
-
-        em.color(app.conf.color);
-        em.author(serverInfo.name, serverInfo.image);
-        em.title(`${songInfo.artist} - ${songInfo.title}`);
-        if(misc.albumart) em.thumbnail(misc.albumart);
-        em.field(`Title`, songInfo.title, true);
-        em.field(`Artist`, songInfo.artist, true);
-        em.field(`Album`, songInfo.album, true);
-		em.field('Duration', xdurM + ":" + xdurS + " / " + durM + ':' + durS, true);
-		em.field('Raiting', songData.raiting + '/5', true);
-		em.field('\u200b', `[🎵](${song_link})`, true);
-        em.timestamp();
-        em.footer(`Project ${app.bot.user.username} v${app.conf.version} | Environment: ${app.conf.env}`);
-        
-        app.core.createEmbed(msg, em);
+        let cmd = msg.data.options[0].name;
+        if(cmd == "auto") {
+            let automsg = await app.core.setAutoMusic(msg);
+            msg.createMessage(automsg);
+        }
+        if(cmd == "playing") {
+            
+            let 
+                api = await app.core.getRemote(app.conf.fm_api),
+                em = app.bot.makeEmbed();
+    
+            await msg.defer();
+            if(!api.is_online) return app.core.createMessage(msg, `Music API is currently offline`);
+    
+            let
+                serverInfo = api.server_info,
+                songInfo = api.song_info,
+                songTimes = api.song_times,
+                songData = api.song_data,
+                misc = api.misc,
+                duration = songTimes.duration,
+                xdur = songTimes.played,
+                durM = (Math.floor(duration / 60)),
+                durS = (duration % 60),
+                xdurM = (Math.floor(xdur / 60)),
+                xdurS = (xdur % 60),
+                song_link = misc.songlink ? misc.songlink : "https://gensokyobot.com";
+            
+            if(durS < 10) durS = "0" + durS;
+            if(xdurS < 10) xdurS = "0" + xdurS;
+    
+            em.color(app.conf.color);
+            em.author(serverInfo.name, serverInfo.image);
+            em.title(`${songInfo.artist} - ${songInfo.title}`);
+            if(misc.albumart) em.thumbnail(misc.albumart);
+            em.field(`Title`, songInfo.title, true);
+            em.field(`Artist`, songInfo.artist, true);
+            em.field(`Album`, songInfo.album, true);
+            em.field('Duration', xdurM + ":" + xdurS + " / " + durM + ':' + durS, true);
+            em.field('Raiting', songData.raiting + '/5', true);
+            em.field('\u200b', `[🎵](${song_link})`, true);
+            em.timestamp();
+            em.footer(`Project ${app.bot.user.username} v${app.conf.version} | Environment: ${app.conf.env}`);
+            
+            app.core.createEmbed(msg, em);
+            
+        }
     }
 });
 
