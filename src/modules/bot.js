@@ -61,10 +61,10 @@ mod.command("stats", {
 **Bot**
 \`\`\`yaml
 Started: ${stats.started} UTC
-Memory: ${stats.ram.used.toFixed(2)} MB / ${stats.ram.total.toFixed(2)} MB
-Load Avg: ${stats.loadavg[0].toFixed(3)}, ${stats.loadavg[1].toFixed(3)}, ${stats.loadavg[1].toFixed(3)}
+Memory: ${stats.ram.used} / ${stats.ram.total}
+Load Avg: ${stats.loadavg[0].toFixed(3)}, ${stats.loadavg[1].toFixed(3)}, ${stats.loadavg[2].toFixed(3)}
 \`\`\`
-**Sharding**
+**${stats.server} Sharding**
 \`\`\`yaml
 Online: ${stats.online_shards} / ${stats.total_shards}
 Total Guilds: ${stats.total_guilds}
